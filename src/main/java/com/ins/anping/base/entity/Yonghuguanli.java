@@ -1,13 +1,14 @@
 package com.ins.anping.base.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -80,6 +81,10 @@ public class Yonghuguanli implements Serializable {
     @TableField("ZhuCeShiJian")
     private String zhuceshijian;
 
+    @ApiModelProperty(value = "上级名字")
+    @TableField("Leader")
+    private String leader;
+
     @ApiModelProperty(value = "用户名")
     @TableField("UserName")
     private String username;
@@ -91,6 +96,5 @@ public class Yonghuguanli implements Serializable {
     @ApiModelProperty(value = "修改记录时间")
     @TableField("UpdateTime")
     private String updatetime;
-
 
 }

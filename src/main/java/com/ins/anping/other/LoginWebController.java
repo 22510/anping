@@ -2,10 +2,8 @@ package com.ins.anping.other;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ins.anping.base.entity.Mokuaifenpei;
 import com.ins.anping.base.entity.Yonghuguanli;
 import com.ins.anping.base.service.impl.JueseguanliServiceImpl;
-import com.ins.anping.base.service.impl.MokuaifenpeiServiceImpl;
 import com.ins.anping.base.service.impl.YonghuguanliServiceImpl;
 import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.utils.JwtToken;
@@ -52,40 +50,30 @@ public class LoginWebController {
 
     @PostMapping("/register")
     public ResponseResult<?> register(@RequestBody Map<String, String> map) throws Exception {
-//        String YongHuMing = map.get("yonghuming");
         String ShouJi = map.get("shouji");
-//        String JueSe = map.get("juese");
         String MiMa = map.get("mima");
         String captcha = map.get("captcha");
         String captchaToken = map.get("captchaToken");
         if (captchaToken == null){
             throw new RuntimeException("验证码token为空");
         }
-        log.info(captchaToken);
+        log.info("Register:"+captchaToken);
         Map<String, Object> captchaContent = jwtToken.DecodedJWT(captchaToken, new String[]{"phone", "captcha", "expTime"});
-        log.info(captchaContent.toString());
-        if (-1 == Integer.parseInt(captchaContent.get("code").toString())){
+        if (-1 == Integer.parseInt(captchaContent.get("code").toString()) || 5 > Integer.parseInt(captchaContent.get("expTime").toString())){
             return ResponseResult.errorResult(500, "验证码已过期");
         }
-
         if (!ShouJi.equals(captchaContent.get("phone"))){
-            throw new RuntimeException("手机号错误");
+            return ResponseResult.errorResult(500, "手机号错误");
         }
-        if (5 > Integer.parseInt(captchaContent.get("expTime").toString())){
-            return ResponseResult.errorResult(500, "验证码已过期");
-        }
-        System.out.println("验证码过期?");
         if (!captcha.equals(captchaContent.get("captcha"))){
             return ResponseResult.errorResult(500, "验证码错误");
         }
-        System.out.println("验证码失效?");
         QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
         yonghuguanliQueryWrapper.eq("ShouJi", ShouJi);
         // TODO: 如果一个系统中, 有两个人名字相同, 那如何处理...
         if (yonghuguanliService.getOne(yonghuguanliQueryWrapper) != null){
             return ResponseResult.errorResult(500, "账号已经存在");
         }
-        System.out.println("准备保存用户");
         new Yonghuguanli();
         Yonghuguanli userDetail;
         map.remove("captcha");
@@ -96,7 +84,6 @@ public class LoginWebController {
         map.put("juese", String.valueOf(8));
         map.put("inserttime", Calendar.getInstance().getTime().toString());
         userDetail = BeanUtil.toBean(map, Yonghuguanli.class);
-        System.out.println(userDetail.toString());
         if (!yonghuguanliService.save(userDetail)){
             return ResponseResult.errorResult(500, "系统错误, 请联系管理员");
         }
@@ -105,7 +92,7 @@ public class LoginWebController {
 
     @GetMapping("/captcha/{phone}")
     public ResponseResult<?> getCaptcha(@PathVariable("phone") String phone) throws Exception {
-        log.warn("getCaptcha:"+phone);
+        log.info("getCaptcha:"+phone);
         String captcha = SendMessageTencent.sendCaptcha(phone, "5");
         if (captcha == null){
             throw new RuntimeException("验证码发送失败");
@@ -115,15 +102,11 @@ public class LoginWebController {
         returnMap.put("captcha", captcha);
         returnMap.put("expTime", 5);
         String captchaToken =  jwtToken.createToken(returnMap, 10);
-        System.out.println(captchaToken);
         return ResponseResult.okResult(200, "验证码发送成功", captchaToken);
     }
 
     @Autowired
     private YonghuguanliServiceImpl yonghuguanliService;
-
-    @Autowired
-    private MokuaifenpeiServiceImpl mokuaifenpeiService;
 
     @Autowired
     private JueseguanliServiceImpl jueseguanliService;
@@ -142,11 +125,6 @@ public class LoginWebController {
             wrapper.eq("YongHuMing", userName);
         }
         Yonghuguanli userDetail = yonghuguanliService.getOne(wrapper);
-        System.out.println(userDetail.toString());
-        if (userDetail == null){
-            wrapper.eq("", userName);
-        }
-
         if (userDetail == null){
             log.warn("用户{"+userName+"}没注册并尝试登录");
             return ResponseResult.errorResult(500, "用户不存在");
@@ -163,23 +141,23 @@ public class LoginWebController {
         // 用户注册, 管理员审批, 给用户分配角色, 或者用户注册时选择身份, 管理员核实通过
         // 这里应该检测的是用户状态, 0未通过, 1通过
         // 拿角色信息
-        QueryWrapper<Mokuaifenpei> mokuaifenpeiQueryWrapper = new QueryWrapper<>();
-        // TODO: 这里需要获取角色菜单
+//        QueryWrapper<Mokuaifenpei> mokuaifenpeiQueryWrapper = new QueryWrapper<>();
 //        List<Mokuaifenpei> jueSeMokuais = mokuaifenpeiService.list(mokuaifenpeiQueryWrapper.eq("JueSe", userDetail.getJuese()));
 
+        Map<String, Object> retmap = new HashMap<>();
+
         Map<String, Object> userMap = new HashMap<>();
-        System.out.println("用户名:"+ userDetail.getYonghuming());
         userMap.put("username", userDetail.getYonghuming());
         userMap.put("JueSe", userDetail.getJuese());
-        Map<String, Object> retmap = new HashMap<>();
+
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("yonghuming", userDetail.getYonghuming());
         userInfo.put("jueseName", jueseguanliService.getById(userDetail.getJuese()).getJuese());
         userInfo.put("juese", userDetail.getJuese());
-//        userInfo.put("module", jueSeMokuais);
+
         retmap.put("token", jwtToken.createToken(userMap, USER_TOKEN_EXPTIME));
         retmap.put("userInfo", userInfo);
-        log.info(retmap.toString());
+        log.info("Login:"+ retmap);
         return ResponseResult.okResult(200, "登录成功", retmap);
     }
 

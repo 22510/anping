@@ -3,14 +3,12 @@ package com.ins.anping.base.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ins.anping.base.entity.Fukuanjiedian;
-import com.ins.anping.base.entity.Ziliao4zulinhetong;
-import com.ins.anping.base.entity.Zulinhetong;
-import com.ins.anping.base.entity.Zulinhetongwuliao;
+import com.ins.anping.base.entity.*;
 import com.ins.anping.base.service.impl.*;
 import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.utils.OCRByBaiDu.AccurateBasic;
 import com.ins.anping.utils.UserHolder;
+import com.ins.anping.utils.WebSocket.WebSocketServer;
 import com.ins.anping.utils.fileSave.SaveLocal;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,13 +44,13 @@ public class ZulinhetongController {
     private ZulinhetongwuliaoServiceImpl zulinhetongwuliaoService;
 
     @Autowired
-    private ZulinjiesuanServiceImpl zulinjiesuanService;
-
-    @Autowired
     private FukuanjiedianServiceImpl fukuanjiedianService;
 
     @Autowired
     private ZulinhetongServiceImpl zulinhetongService;
+
+    @Autowired
+    private YonghuguanliServiceImpl yonghuguanliService;
 
     @ApiOperation("查询该业务员的所有租赁合同")
     @GetMapping("/list")
@@ -85,19 +84,64 @@ public class ZulinhetongController {
         return ResponseResult.errorResult(500, "操作失败");
     }
 
+    @Autowired
+    private WebSocketServer webSocketServer;
+
+    @Autowired
+    private XiaoxituisonglogServiceImpl xiaoxituisonglogService;
+
+    @Autowired
+    private LiuchengdingyiServiceImpl liuchengdingyiService;
+
+    @Autowired
+    private LiuchengjiluServiceImpl liuchengjiluService;
+
     @PostMapping
     public ResponseResult<?> save(@RequestBody Zulinhetong zulinhetong) {
-        System.out.println(zulinhetong);
+//        System.out.println(zulinhetong);
         QueryWrapper<Ziliao4zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
         zulinhetongQueryWrapper.eq("HeTongBianHao", zulinhetong.getHetongbianhao());
         List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(zulinhetongQueryWrapper);
+
         zulinhetong.setYewuyuan(UserHolder.getUser().getUsername());
+
         List<String> urls = new ArrayList<>();
         for (Ziliao4zulinhetong str : list){
             urls.add(str.getZiliaopath());
         }
         zulinhetong.setHetongtupian(urls.toString());
+
+        QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
+        yonghuguanliQueryWrapper.eq("YongHuMing", UserHolder.getUser().getUsername());
+        Yonghuguanli yonghuguanli = yonghuguanliService.getOne(yonghuguanliQueryWrapper);
+//        log.info(yonghuguanli.toString());
+
         if (zulinhetongService.save(zulinhetong)) {
+            String xiaoxiNeiRong = "有租赁合同需要审批, 合同编号:" + zulinhetong.getHetongbianhao() + ", 负责业务员:" + UserHolder.getUser().getUsername();
+            Map<String, String> xiaoxi = new HashMap<>();
+            xiaoxi.put("neirong", xiaoxiNeiRong);
+            xiaoxi.put("type", "info");
+            // xiaoxi.put
+            System.out.println(yonghuguanli.getLeader());
+            WebSocketServer.sendInfo(yonghuguanli.getLeader(), xiaoxi.toString());
+            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
+            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
+            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
+            xiaoxituisonglog.setJieshoufangid(yonghuguanli.getLeader());
+            xiaoxituisonglog.setType("info");
+            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
+            xiaoxituisonglogService.save(xiaoxituisonglog);
+
+            Liuchengjilu liuchengjilu = new Liuchengjilu();
+            liuchengjilu.setYonghuming(UserHolder.getUser().getUsername());
+            liuchengjilu.setLiuchengmingcheng("租赁合同审批");
+            liuchengjilu.setShunxu("0");
+            liuchengjilu.setYewubiaoshi(zulinhetong.getHetongbianhao());
+            liuchengjilu.setTime(LocalDateTime.now().toString());
+            liuchengjilu.setChulijieguo("待审核");
+            liuchengjilu.setBeizhu("null");
+
+            liuchengjiluService.save(liuchengjilu);
             return ResponseResult.okResult(200, "操作成功", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
@@ -105,7 +149,37 @@ public class ZulinhetongController {
 
     @PutMapping
     public ResponseResult<?> updateById(@RequestBody Zulinhetong zulinhetong) {
+
         if (zulinhetongService.updateById(zulinhetong)) {
+            QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
+            yonghuguanliQueryWrapper.eq("YongHuMing", UserHolder.getUser().getUsername());
+            Yonghuguanli yonghuguanli = yonghuguanliService.getOne(yonghuguanliQueryWrapper);
+
+            String xiaoxiNeiRong = "有租赁合同需要审批, 合同编号:" + zulinhetong.getHetongbianhao() + ", 负责业务员:" + UserHolder.getUser().getUsername();
+            Map<String, String> xiaoxi = new HashMap<>();
+            xiaoxi.put("neirong", xiaoxiNeiRong);
+            xiaoxi.put("type", "info");
+            // xiaoxi.put
+            System.out.println(yonghuguanli.getLeader());
+            WebSocketServer.sendInfo(yonghuguanli.getLeader(), xiaoxi.toString());
+            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
+            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
+            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
+            xiaoxituisonglog.setJieshoufangid(yonghuguanli.getLeader());
+            xiaoxituisonglog.setType("info");
+            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
+            xiaoxituisonglogService.save(xiaoxituisonglog);
+
+            Liuchengjilu liuchengjilu = new Liuchengjilu();
+            liuchengjilu.setYonghuming(UserHolder.getUser().getUsername());
+            liuchengjilu.setLiuchengmingcheng("租赁合同审批");
+            liuchengjilu.setShunxu("0");
+            liuchengjilu.setYewubiaoshi(zulinhetong.getHetongbianhao());
+            liuchengjilu.setTime(LocalDateTime.now().toString());
+            liuchengjilu.setChulijieguo("待审核");
+            liuchengjilu.setBeizhu("null");
+            liuchengjiluService.save(liuchengjilu);
+
             return ResponseResult.okResult(200, "操作成功", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
@@ -113,7 +187,11 @@ public class ZulinhetongController {
 
     @DeleteMapping("/{id}")
     public ResponseResult<?> remove(@PathVariable Long id) {
-        if (zulinhetongService.removeById(id)) {
+        Zulinhetong hetong = zulinhetongService.getById(id);
+        hetong.setHetongzhixingjindu("已作废");
+        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        zulinhetongQueryWrapper.eq("id", id);
+        if (zulinhetongService.update(hetong, zulinhetongQueryWrapper)) {
             return ResponseResult.okResult(200, "success", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
@@ -317,15 +395,24 @@ public class ZulinhetongController {
 //    }
 
     @PostMapping("/materialAdd/{HeTongBianHao}")
-    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {
-        if (files.isEmpty()) {
-            return ResponseResult.errorResult(500, "合同照片为空");
+//    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {
+    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, MultipartRequest files) throws IOException {
+        Map<String, MultipartFile> fileMap1 = files.getFileMap();
+        List<MultipartFile> fileMap = new ArrayList<>();
+        Set<Map.Entry<String, MultipartFile>> entries = fileMap1.entrySet();
+        for (Map.Entry<String, MultipartFile> entry : entries) {
+            fileMap.add(entry.getValue());
         }
-        Map<String, String> url2Files = SaveLocal.saveFileLocal(files, "\\ZuLinHeTongGuanli\\" + HeTongBianHao);
-
-        if (url2Files.size() != files.size()) {
-            throw new RuntimeException("合同保存失败.");
+        if (fileMap.isEmpty()) {
+            return ResponseResult.errorResult(500, "合同资料为空");
         }
+        Map<String, String> url2Files = SaveLocal.saveFileLocal(fileMap, "\\ZuLinHeTongGuanli\\" + HeTongBianHao);
+        if (url2Files.size() != fileMap.size()) {
+            throw new RuntimeException("合同资料保存失败.");
+        }
+        QueryWrapper<Ziliao4zulinhetong> ziliao4zulinhetongQueryWrapper = new QueryWrapper<>();
+        ziliao4zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+        List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(ziliao4zulinhetongQueryWrapper);
         List<Ziliao4zulinhetong> ziliao4zulinhetongs = new ArrayList<>();
         for (Map.Entry<String, String> entry : url2Files.entrySet()) {
             Ziliao4zulinhetong ziliao4zulinhetong = new Ziliao4zulinhetong();
@@ -334,7 +421,10 @@ public class ZulinhetongController {
             ziliao4zulinhetong.setZiliaopath(entry.getValue());
             ziliao4zulinhetongs.add(ziliao4zulinhetong);
         }
-        if (!ziliao4zulinhetongService.saveBatch(ziliao4zulinhetongs)) {
+
+        list.addAll(ziliao4zulinhetongs);
+
+        if (!ziliao4zulinhetongService.saveBatch(list)) {
             throw new RuntimeException("合同保存失败.");
         }
 
@@ -342,8 +432,7 @@ public class ZulinhetongController {
         QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
         zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
         Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
-        String savePath = zulinhetong.getHetongtupian();
-        zulinhetong.setHetongtupian(url2Files + savePath);
+        zulinhetong.setHetongtupian(list.toString());
         if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
             throw new RuntimeException("合同保存失败.");
         }
@@ -351,6 +440,111 @@ public class ZulinhetongController {
         return ResponseResult.okResult(200, "操作成功", null);
     }
 
+//    @PostMapping("/materialAdd/{HeTongBianHao}")
+////    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {
+//    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, MultipartRequest files) throws IOException {
+//        Map<String, MultipartFile> fileMap1 = files.getFileMap();
+//        List<MultipartFile> fileMap = new ArrayList<>();
+//        Set<Map.Entry<String, MultipartFile>> entries = fileMap1.entrySet();
+//        for (Map.Entry<String, MultipartFile> entry : entries) {
+//            fileMap.add(entry.getValue());
+//        }
+//        if (fileMap.isEmpty()) {
+//            return ResponseResult.errorResult(500, "合同资料为空");
+//        }
+//        Map<String, String> url2Files = SaveLocal.saveFileLocal(fileMap, "\\ZuLinHeTongGuanli\\" + HeTongBianHao);
+//        if (url2Files.size() != fileMap.size()) {
+//            throw new RuntimeException("合同资料保存失败.");
+//        }
+//        QueryWrapper<Ziliao4zulinhetong> ziliao4zulinhetongQueryWrapper = new QueryWrapper<>();
+//        ziliao4zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+//        List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(ziliao4zulinhetongQueryWrapper);
+//        List<Ziliao4zulinhetong> ziliao4zulinhetongs = new ArrayList<>();
+//        for (Map.Entry<String, String> entry : url2Files.entrySet()) {
+//            Ziliao4zulinhetong ziliao4zulinhetong = new Ziliao4zulinhetong();
+//            ziliao4zulinhetong.setHetongbianhao(HeTongBianHao);
+//            ziliao4zulinhetong.setZiliaomingcheng(entry.getKey());
+//            ziliao4zulinhetong.setZiliaopath(entry.getValue());
+//            ziliao4zulinhetongs.add(ziliao4zulinhetong);
+//        }
+//
+//        list.addAll(ziliao4zulinhetongs);
+//
+//        if (!ziliao4zulinhetongService.saveBatch(list)) {
+//            throw new RuntimeException("合同资料保存失败.");
+//        }
+//
+//        // TODO: 这里关于ZuLinHeTong里的
+//        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+//        zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+//        Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
+//        zulinhetong.setHetongtupian(list.toString());
+//        if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
+//            throw new RuntimeException("合同更新失败.");
+//        }
+//        log.info("合同" + HeTongBianHao + "保存");
+//        return ResponseResult.okResult(200, "操作成功", null);
+//    }
+
+
+    @Transactional
+    @PostMapping("/materialDelete/{HeTongBianHao}")
+//    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {
+    public ResponseResult<?> materialDelete(@PathVariable String HeTongBianHao, List<String> ziliao2Delete) throws IOException {
+        QueryWrapper<Ziliao4zulinhetong> ziliao4zulinhetongQueryWrapper = new QueryWrapper<>();
+        ziliao4zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao).in("ZiLiaoMingCheng", ziliao2Delete);
+        if (ziliao4zulinhetongService.remove(ziliao4zulinhetongQueryWrapper)){
+            return ResponseResult.okResult(200, "资料删除成功", null);
+        }
+        ziliao4zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+        List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(ziliao4zulinhetongQueryWrapper);
+        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+        Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
+        zulinhetong.setHetongtupian(list.toString());
+        if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
+            throw new RuntimeException("合同保存失败.");
+        }
+        log.info("合同" + HeTongBianHao + "保存");
+        return ResponseResult.okResult(200, "操作成功", null);
+    }
+
+    @PostMapping("/shenHe")
+    public ResponseResult<?> examineHeTong(Map<String, String> map){
+        Liuchengjilu liuchengjilu = new Liuchengjilu();
+        liuchengjilu.setYonghuming(map.get("YongHuMing"));
+        liuchengjilu.setLiuchengmingcheng("租赁合同审批");
+
+        QueryWrapper<Liuchengdingyi> liuchengdingyiQueryWrapper = new QueryWrapper<>();
+        liuchengdingyiQueryWrapper.eq("LiuChengMingCheng", "租赁合同审批").eq("JueSe", UserHolder.getUser().getJueSe());
+        Liuchengdingyi liuchengdingyi = liuchengdingyiService.getOne(liuchengdingyiQueryWrapper);
+
+        liuchengjilu.setShunxu(liuchengdingyi.getShunxu());
+        liuchengjilu.setYewubiaoshi(map.get("HeTongBianHao"));
+        liuchengjilu.setChulijieguo(map.get("ChuLiJieGuo"));
+        liuchengjilu.setTime(LocalDateTime.now().toString());
+        liuchengjilu.setBeizhu(map.get("BeiZhu"));
+
+        if (liuchengjiluService.save(liuchengjilu)) {
+            String xiaoxiNeiRong = "合同编号:" + map.get("HeTongBianHao") + "审批结果为:" + map.get("ChuLiJieGuo")+".";
+            Map<String, String> xiaoxi = new HashMap<>();
+            xiaoxi.put("neirong", xiaoxiNeiRong);
+            xiaoxi.put("type", "info");
+            // xiaoxi.put
+            WebSocketServer.sendInfo(map.get("YongHuMing"), xiaoxi.toString());
+            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
+            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
+            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
+            xiaoxituisonglog.setJieshoufangid(map.get("YongHuMing"));
+            xiaoxituisonglog.setType("info");
+            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
+            xiaoxituisonglogService.save(xiaoxituisonglog);
+
+            return ResponseResult.okResult(200, "操作成功", null);
+        }else {
+            throw  new RuntimeException("审核失败.");
+        }
+    }
 
 }
 

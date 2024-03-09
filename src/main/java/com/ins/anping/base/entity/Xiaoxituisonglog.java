@@ -1,11 +1,12 @@
 package com.ins.anping.base.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -31,11 +32,11 @@ public class Xiaoxituisonglog implements Serializable {
 
     @ApiModelProperty(value = "消息发送者的用户ID")
     @TableField("FaSongFangId")
-    private Long fasongfangid;
+    private String fasongfangid;
 
     @ApiModelProperty(value = "消息接收者的用户ID")
     @TableField("JieShouFangId")
-    private Long jieshoufangid;
+    private String jieshoufangid;
 
     @ApiModelProperty(value = "消息状态: sent, read, 已发送, 已读")
     private String status;

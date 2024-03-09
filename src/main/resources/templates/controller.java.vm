@@ -1,0 +1,113 @@
+package ${package.Controller};
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ins.anping.model.common.ResponseResult;
+import ${package.Entity}.${entity};
+import ${package.Service}.impl.${table.serviceImplName} ;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+#if(${restControllerStyle})
+import org.springframework.web.bind.annotation.RestController;
+#else
+import org.springframework.stereotype.Controller;
+#end
+#if(${superControllerClassPackage})
+import ${superControllerClassPackage};
+#end
+
+/**
+ * <p>
+ * $!{table.comment} 前端控制器
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@Slf4j
+##@RequestMapping("#if(${package.ModuleName})/${package.ModuleName}#end/#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+@RequestMapping("api/busi/table/#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+#if(${kotlin})
+class ${table.controllerName}#if(${superControllerClass}) : ${superControllerClass}()#end
+
+#else
+#if(${superControllerClass})
+public class ${table.controllerName} extends ${superControllerClass} {
+#else
+public class ${table.controllerName} {
+#end
+
+
+    @Autowired
+    private ${table.serviceImplName}  $!{table.entityPath}Service;
+
+    @ApiOperation("查询所有$!{table.comment}")
+    @GetMapping("")
+    public ResponseResult<?> list(){
+        List<${entity}> list= $!{table.entityPath}Service.list();
+        if(!list.isEmpty()){
+            return ResponseResult.okResult(200, "success", list);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
+    ##    @ApiOperation("获取$!{table.comment}详细信息")
+    @GetMapping(value = "/{id}")
+    public ResponseResult<?> getById(@PathVariable Long id){
+        ${entity} result = $!{table.entityPath}Service.getById(id);
+        if (result != null) {
+            return ResponseResult.okResult(200, "success", result);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
+##    @ApiOperation("分页查询$!{table.comment}")
+    @GetMapping("/page")
+    public ResponseResult<?> page(@RequestBody Page<${entity}> page){
+        IPage<${entity}> $!{table.entityPath}IPage= $!{table.entityPath}Service.page(page);
+        if($!{table.entityPath}IPage != null) {
+            return ResponseResult.okResult(200, "success", $!{table.entityPath}IPage);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
+##    @ApiOperation("新增$!{table.comment}")
+    @PostMapping
+    public ResponseResult<?> save(@RequestBody ${entity} ${table.entityPath}){
+        if (${table.entityPath}Service.save(${table.entityPath})){
+            return ResponseResult.okResult(200, "操作成功", null);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
+##    @ApiOperation("修改$!{table.comment}")
+    @PutMapping
+    public ResponseResult<?> updateById(@RequestBody ${entity} ${table.entityPath}){
+        if (${table.entityPath}Service.updateById(${table.entityPath})){
+            return ResponseResult.okResult(200, "操作成功", null);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
+##    @ApiOperation("删除$!{table.comment}")
+    @DeleteMapping("/{id}")
+    public ResponseResult<?> remove(@PathVariable Long id){
+        if (${table.entityPath}Service.removeById(id)){
+            return ResponseResult.okResult(200, "success", null);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+}
+
+#end

@@ -10,21 +10,20 @@ import com.ins.anping.base.entity.Zulinhetongwuliao;
 import com.ins.anping.base.service.impl.*;
 import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.utils.OCRByBaiDu.AccurateBasic;
+import com.ins.anping.utils.UserHolder;
 import com.ins.anping.utils.fileSave.SaveLocal;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +33,7 @@ import java.util.regex.Pattern;
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-06zu
  */
 @Slf4j
 @RestController
@@ -54,10 +53,14 @@ public class ZulinhetongController {
     @Autowired
     private ZulinhetongServiceImpl zulinhetongService;
 
-    @ApiOperation("查询所有租赁合同")
-    @GetMapping("")
+    @ApiOperation("查询该业务员的所有租赁合同")
+    @GetMapping("/list")
     public ResponseResult<?> list() {
-        List<Zulinhetong> list = zulinhetongService.list();
+        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        System.out.println(UserHolder.getUser().getUsername());
+        zulinhetongQueryWrapper.eq("YeWuYuan", UserHolder.getUser().getUsername());
+        List<Zulinhetong> list = zulinhetongService.list(zulinhetongQueryWrapper);
+        System.out.println(list.toString());
         if (!list.isEmpty()) {
             return ResponseResult.okResult(200, "success", list);
         }
@@ -84,6 +87,16 @@ public class ZulinhetongController {
 
     @PostMapping
     public ResponseResult<?> save(@RequestBody Zulinhetong zulinhetong) {
+        System.out.println(zulinhetong);
+        QueryWrapper<Ziliao4zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        zulinhetongQueryWrapper.eq("HeTongBianHao", zulinhetong.getHetongbianhao());
+        List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(zulinhetongQueryWrapper);
+        zulinhetong.setYewuyuan(UserHolder.getUser().getUsername());
+        List<String> urls = new ArrayList<>();
+        for (Ziliao4zulinhetong str : list){
+            urls.add(str.getZiliaopath());
+        }
+        zulinhetong.setHetongtupian(urls.toString());
         if (zulinhetongService.save(zulinhetong)) {
             return ResponseResult.okResult(200, "操作成功", null);
         }
@@ -158,9 +171,9 @@ public class ZulinhetongController {
 //                            key = key + "_" + count;
                             Object dValue = returnMap.get(key);
                             ArrayList<String> list;
-                            if(dValue instanceof ArrayList){
+                            if (dValue instanceof ArrayList) {
                                 list = (ArrayList<String>) dValue;
-                            }else {
+                            } else {
                                 list = new ArrayList<>();
                                 list.add(dValue.toString());
                             }
@@ -219,18 +232,23 @@ public class ZulinhetongController {
     @Autowired
     private Ziliao4zulinhetongServiceImpl ziliao4zulinhetongService;
 
-
-//    @PostMapping(value = "/photoOCR", headers = "Content-Type=multipart/form-data")
+    //    @PostMapping(value = "/photoOCR", headers = "Content-Type=multipart/form-data")
 ////    public ResponseResult<?> photoOCR(@RequestParam(value = "files") List<MultipartFile> files) throws IOException {
 //    public ResponseResult<?> photoOCR(MultipartRequest files) throws IOException {
-    //    @Transactional
+    @Transactional
     @PostMapping(value = "/materialSubmit/{HeTongBianHao}", headers = "Content-Type=multipart/form-data")
     public ResponseResult<?> materialSubmit(@PathVariable String HeTongBianHao, MultipartRequest files) throws IOException {
-        List<MultipartFile> fileMap = (List<MultipartFile>) files.getFileMap().values();
+        // List<MultipartFile> fileMap = (List<MultipartFile>) files.getFileMap().values();
+        Map<String, MultipartFile> fileMap1 = files.getFileMap();
+        List<MultipartFile> fileMap = new ArrayList<>();
+        Set<Map.Entry<String, MultipartFile>> entries = fileMap1.entrySet();
+        for (Map.Entry<String, MultipartFile> entry : entries) {
+            fileMap.add(entry.getValue());
+        }
         if (fileMap.isEmpty()) {
             return ResponseResult.errorResult(500, "合同资料为空");
         }
-        Map<String, String> url2Files = SaveLocal.saveFileLocal(fileMap, "\\ZuLinHeTongGuanli\\" + HeTongBianHao);
+        Map<String, String> url2Files = SaveLocal.saveFileLocal(fileMap, HeTongBianHao);
         if (url2Files.size() != fileMap.size()) {
             throw new RuntimeException("合同资料保存失败.");
         }
@@ -243,19 +261,60 @@ public class ZulinhetongController {
             ziliao4zulinhetongs.add(ziliao4zulinhetong);
         }
         // TODO 可以抽取出公共代码丢Ziliao4zulinhetongServiceImpl里
+        //   for(Ziliao4zulinhetong item : ziliao4zulinhetongs){
+        //        ziliao4zulinhetongService.save(item);
+        //    }
         if (!ziliao4zulinhetongService.saveBatch(ziliao4zulinhetongs)) {
             throw new RuntimeException("合同保存失败.");
         }
-        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
-        zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
-        Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
-        zulinhetong.setHetongtupian(url2Files.toString());
-        if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
-            throw new RuntimeException("合同资料保存失败.");
-        }
+//        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+//        zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+//        Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
+//        zulinhetong.setHetongtupian(ziliao4zulinhetongs.toString());
+//        if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
+//            throw new RuntimeException("合同资料保存失败.");
+//        }
         log.info("合同{" + HeTongBianHao + "}资料保存");
-        return ResponseResult.okResult(200, "操作成功", null);
+        return ResponseResult.okResult(200, "操作成功", ziliao4zulinhetongs);
     }
+//    @PostMapping(value = "/materialSubmit/{HeTongBianHao}", headers = "Content-Type=multipart/form-data")
+//    public ResponseResult<?> materialSubmit(@PathVariable("HeTongBianHao") String HeTongBianHao, MultipartRequest files) throws IOException {
+//        Map<String, MultipartFile> files_map = files.getFileMap();
+//        List<MultipartFile> fileMap = new ArrayList<>(files_map.values());
+////        List<MultipartFile> fileMap = (List<MultipartFile>) files.getFileMap().values();
+//
+//        if (fileMap.isEmpty()) {
+//            return ResponseResult.errorResult(500, "合同资料为空");
+//        }
+//        log.warn("length4Files:"+fileMap.size());
+//        Map<String, String> url2Files = SaveLocal.saveFileLocal(fileMap, "\\ZuLinHeTongGuanli\\" + HeTongBianHao);
+//        log.warn(url2Files.toString());
+//        if (url2Files.size() != fileMap.size()) {
+//            throw new RuntimeException("合同资料保存失败.");
+//        }
+//        List<Ziliao4zulinhetong> ziliao4zulinhetongs = new ArrayList<>();
+//        for (Map.Entry<String, String> entry : url2Files.entrySet()) {
+//            Ziliao4zulinhetong ziliao4zulinhetong = new Ziliao4zulinhetong();
+//            ziliao4zulinhetong.setHetongbianhao(HeTongBianHao);
+//            ziliao4zulinhetong.setZiliaomingcheng(entry.getKey());
+//            ziliao4zulinhetong.setZiliaopath(entry.getValue());
+//            ziliao4zulinhetongs.add(ziliao4zulinhetong);
+//        }
+//        // TODO 可以抽取出公共代码丢Ziliao4zulinhetongServiceImpl里
+//        if (!ziliao4zulinhetongService.saveBatch(ziliao4zulinhetongs)) {
+//            throw new RuntimeException("合同保存失败.");
+//        }
+//        log.info("ZiLiao4ZuLinHeTong:"+ziliao4zulinhetongs);
+//        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+//        zulinhetongQueryWrapper.eq("HeTongBianHao", HeTongBianHao);
+//        Zulinhetong zulinhetong = zulinhetongService.getOne(zulinhetongQueryWrapper);
+//        zulinhetong.setHetongtupian(url2Files.toString());
+//        if (!zulinhetongService.update(zulinhetong, zulinhetongQueryWrapper)) {
+//            throw new RuntimeException("合同资料保存失败.");
+//        }
+//        log.info("合同{" + HeTongBianHao + "}资料保存");
+//        return ResponseResult.okResult(200, "操作成功", null);
+//    }
 
     @PostMapping("/materialAdd/{HeTongBianHao}")
     public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {

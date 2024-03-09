@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ins.anping.base.entity.Mokuaifenpei;
 import com.ins.anping.base.entity.Yonghuguanli;
+import com.ins.anping.base.service.impl.JueseguanliServiceImpl;
 import com.ins.anping.base.service.impl.MokuaifenpeiServiceImpl;
 import com.ins.anping.base.service.impl.YonghuguanliServiceImpl;
 import com.ins.anping.model.common.ResponseResult;
@@ -124,6 +125,9 @@ public class LoginWebController {
     @Autowired
     private MokuaifenpeiServiceImpl mokuaifenpeiService;
 
+    @Autowired
+    private JueseguanliServiceImpl jueseguanliService;
+
     private ResponseResult<?> getLoginInfo(Map<String, String> map) throws Exception {
         // 这里map里只存有用户名和密码
         String userName = map.get("username");
@@ -164,11 +168,13 @@ public class LoginWebController {
 //        List<Mokuaifenpei> jueSeMokuais = mokuaifenpeiService.list(mokuaifenpeiQueryWrapper.eq("JueSe", userDetail.getJuese()));
 
         Map<String, Object> userMap = new HashMap<>();
-        userMap.put("username", userName);
+        System.out.println("用户名:"+ userDetail.getYonghuming());
+        userMap.put("username", userDetail.getYonghuming());
         userMap.put("JueSe", userDetail.getJuese());
         Map<String, Object> retmap = new HashMap<>();
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("yonghuming", userDetail.getYonghuming());
+        userInfo.put("jueseName", jueseguanliService.getById(userDetail.getJuese()).getJuese());
         userInfo.put("juese", userDetail.getJuese());
 //        userInfo.put("module", jueSeMokuais);
         retmap.put("token", jwtToken.createToken(userMap, USER_TOKEN_EXPTIME));

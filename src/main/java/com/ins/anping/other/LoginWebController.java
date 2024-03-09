@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -162,7 +161,7 @@ public class LoginWebController {
         // 拿角色信息
         QueryWrapper<Mokuaifenpei> mokuaifenpeiQueryWrapper = new QueryWrapper<>();
         // TODO: 这里需要获取角色菜单
-        List<Mokuaifenpei> jueSeMokuais = mokuaifenpeiService.list(mokuaifenpeiQueryWrapper.eq("JueSe", userDetail.getJuese()));
+//        List<Mokuaifenpei> jueSeMokuais = mokuaifenpeiService.list(mokuaifenpeiQueryWrapper.eq("JueSe", userDetail.getJuese()));
 
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("username", userName);

@@ -2,18 +2,18 @@ package com.ins.anping.base.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.base.entity.Mokuaifenpei;
-import com.ins.anping.base.service.impl.MokuaifenpeiServiceImpl ;
+import com.ins.anping.base.service.impl.MokuaifenpeiServiceImpl;
+import com.ins.anping.model.common.ResponseResult;
+import com.ins.anping.utils.GetMenus.GetMenus;
+import com.ins.anping.utils.UserHolder;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-
-import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
 
 /**
  * <p>
@@ -42,7 +42,7 @@ public class MokuaifenpeiController {
         return ResponseResult.errorResult(500, "操作失败");
     }
 
-        @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseResult<?> getById(@PathVariable Long id){
         Mokuaifenpei result = mokuaifenpeiService.getById(id);
         if (result != null) {
@@ -83,5 +83,17 @@ public class MokuaifenpeiController {
         }
         return ResponseResult.errorResult(500, "操作失败");
     }
+
+    @Autowired
+    private GetMenus getMenus;
+    @GetMapping(value = "/JueSe")
+    public ResponseResult<?> getById(){
+        List<Map<String, Object>> modules = getMenus.GetModules(Integer.valueOf(UserHolder.getUser().getJueSe()));
+        if (modules != null) {
+            return ResponseResult.okResult(200, "success", modules);
+        }
+        return ResponseResult.errorResult(500, "操作失败");
+    }
+
 }
 

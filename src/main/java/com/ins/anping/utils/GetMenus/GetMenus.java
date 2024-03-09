@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class GetMenus {
@@ -21,7 +22,7 @@ public class GetMenus {
     @Autowired
     private MokuaifenpeiServiceImpl mokuaifenpeiService;
 
-    public HashSet<String> GetModules(Integer jueSeId){
+    public List<Map<String, Object>> GetModules(Integer jueSeId){
         Jueseguanli jueSeguanli = jueseguanliService.getById(jueSeId);
         System.out.println(jueSeguanli.toString());
         QueryWrapper<Mokuaifenpei> mokuaifenpeiQueryWrapper = new QueryWrapper<>();
@@ -34,9 +35,7 @@ public class GetMenus {
             Collections.addAll(titleList, split);
         }
         System.out.println(titleList);
-        return titleList;
-
-
+        return GetMenuTools.GetMenus(String.valueOf(titleList));
 /* 取出来的数据长这样
 Jueseguanli(id=8, juese=业务员, zhongyaoxing=, beizhu=, username=cmxadmin, inserttime=2023-12-12 22:36:41, updatetime=null)
 Mokuaifenpei(id=4, juese=8, gongnengliebiao=添加,修改,删除,导出Excel, mokuaiming=发起租赁发货,租赁合同, beizhu=null, username=null, inserttime=null, updatetime=null)
@@ -59,8 +58,6 @@ Mokuaifenpei(id=50, juese=8, gongnengliebiao=添加,修改,删除, mokuaiming=�
 //        mokuaifenpeis.add(new Mokuaifenpei(30L,"8","添加,修改,删除",",物料汇总,物料库存一览图,租赁合同,租赁合同物料,发起租赁发货,发货信息查询,发起租赁退货,退货信息查询,库房备货历史数据查询,库房发货查询,库房退货信息查询,销售合同,销售合同物料,销售发起发货,销售发货信息查询,销售发起退货,销售发起退货信息查询,销售库房备货历史查询,销售库房发货查询,销售库房退货查询,转租合同,转租合同物料,转租业务员发起收货信息查询,转租业务员发起退回信息查询,转租物料入库历史查询,转租退回物料历史查询",null,null,null,null));
 //        mokuaifenpeis.add(new Mokuaifenpei(39L,"8","添加,修改,删除","业务员",null,null,null,null));
 //        mokuaifenpeis.add(new Mokuaifenpei(50L,"8","添加,修改,删除","付款节点",null,null,null,null));
-
-
     }
 
 

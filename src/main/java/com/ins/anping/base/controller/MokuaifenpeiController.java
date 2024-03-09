@@ -89,6 +89,7 @@ public class MokuaifenpeiController {
     @GetMapping(value = "/JueSe")
     public ResponseResult<?> getById(){
         List<Map<String, Object>> modules = getMenus.GetModules(Integer.valueOf(UserHolder.getUser().getJueSe()));
+        log.warn(modules.toString());
         if (modules != null) {
             return ResponseResult.okResult(200, "success", modules);
         }

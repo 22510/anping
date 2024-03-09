@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -130,13 +131,16 @@ public class WebSocketServer {
 
     /**
      * 实现服务器主动推送消息到 指定客户端
+     *
+     * @return
      */
-    public static void sendMessage(String message, String sid) throws IOException {
+    public static Future<Void> sendMessage(String message, String sid) throws IOException {
         Session session = sessionPool.get(sid);
         if (session != null && session.isOpen()) {
-            session.getAsyncRemote().sendText(message);
+            return session.getAsyncRemote().sendText(message);
         }
         log.info("[WebSocket] 推送消息到<" + sid + ">，推送内容:" + message);
+        return null;
     }
 
 //    /**

@@ -43,6 +43,15 @@ public class ZulinhetongController {
 
 
     @Autowired
+    private ZulinhetongwuliaoServiceImpl zulinhetongwuliaoService;
+
+    @Autowired
+    private ZulinjiesuanServiceImpl zulinjiesuanService;
+
+    @Autowired
+    private FukuanjiedianServiceImpl fukuanjiedianService;
+
+    @Autowired
     private ZulinhetongServiceImpl zulinhetongService;
 
     @ApiOperation("查询所有租赁合同")
@@ -169,15 +178,6 @@ public class ZulinhetongController {
         }
         return ResponseResult.okResult(200, "操作成功", returnMap);
     }
-
-    @Autowired
-    private ZulinhetongwuliaoServiceImpl zulinhetongwuliaoService;
-
-    @Autowired
-    private ZulinjiesuanServiceImpl zulinjiesuanService;
-
-    @Autowired
-    private FukuanjiedianServiceImpl fukuanjiedianService;
 
     /**
      * 获取一分合同清单的详细信息

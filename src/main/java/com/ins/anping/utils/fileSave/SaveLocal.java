@@ -23,6 +23,7 @@ public class SaveLocal {
         }
         // TODO: Linux部署要修改
         String savePath = System.getProperty("user.dir").replace("\\","\\\\") + localSavePath;
+        System.out.println("保存路径:"+savePath);
         for (MultipartFile file : files){
             String fileName = file.getOriginalFilename();
 //            String fileType = file.getContentType();
@@ -41,7 +42,8 @@ public class SaveLocal {
 //            }
             String filePath = savePath + File.separator + fileName;
             file.transferTo(new File(filePath));
-            fileUrls.put(fileName, filePath.replace("\\\\", "\\"));
+            String basePath = "E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli";
+            fileUrls.put(fileName, filePath.replace("\\\\", "\\").substring(basePath.length()));
         }
         return fileUrls;
     }

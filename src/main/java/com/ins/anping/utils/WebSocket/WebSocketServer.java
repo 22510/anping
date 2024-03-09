@@ -116,17 +116,20 @@ public class WebSocketServer {
     /**
      * 群发自定义消息
      * 若指定ID列表, 就发送那些ID的用户
+     *
+     * @return
      */
-    public static void sendMessage(String message, HashSet<String> toSids) throws IOException {
+    public static Future<Void> sendMessage(String message, HashSet<String> toSids) throws IOException {
         for (WebSocketServer item : webSocketSet) {
             //这里可以设定只推送给传入的sid，为null则全部推送
             if (toSids.isEmpty()) {
-                item.session.getAsyncRemote().sendText(message);
+                return item.session.getAsyncRemote().sendText(message);
             }else if (toSids.contains(item.sid)) {
-                item.session.getAsyncRemote().sendText(message);
+                return item.session.getAsyncRemote().sendText(message);
             }
         }
         log.info("[WebSocket]推送消息到客户端 " + toSids + "，推送内容:" + message);
+        return null;
     }
 
     /**

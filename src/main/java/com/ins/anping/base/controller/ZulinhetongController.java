@@ -110,7 +110,7 @@ public class ZulinhetongController {
             urls.add(str.getZiliaopath());
         }
         zulinhetong.setHetongtupian(urls.toString());
-
+        zulinhetong.setHetongzhixingjindu("待审批");
         QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
         yonghuguanliQueryWrapper.eq("YongHuMing", UserHolder.getUser().getUsername());
         Yonghuguanli yonghuguanli = yonghuguanliService.getOne(yonghuguanliQueryWrapper);
@@ -122,7 +122,7 @@ public class ZulinhetongController {
             xiaoxi.put("neirong", xiaoxiNeiRong);
             xiaoxi.put("type", "info");
             // xiaoxi.put
-            System.out.println(yonghuguanli.getLeader());
+//            System.out.println(yonghuguanli.getLeader());
             WebSocketServer.sendInfo(yonghuguanli.getLeader(), xiaoxi.toString());
             Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
             xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
@@ -160,7 +160,7 @@ public class ZulinhetongController {
             xiaoxi.put("neirong", xiaoxiNeiRong);
             xiaoxi.put("type", "info");
             // xiaoxi.put
-            System.out.println(yonghuguanli.getLeader());
+//            System.out.println(yonghuguanli.getLeader());
             WebSocketServer.sendInfo(yonghuguanli.getLeader(), xiaoxi.toString());
             Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
             xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
@@ -309,7 +309,6 @@ public class ZulinhetongController {
 
     @Autowired
     private Ziliao4zulinhetongServiceImpl ziliao4zulinhetongService;
-
     //    @PostMapping(value = "/photoOCR", headers = "Content-Type=multipart/form-data")
 ////    public ResponseResult<?> photoOCR(@RequestParam(value = "files") List<MultipartFile> files) throws IOException {
 //    public ResponseResult<?> photoOCR(MultipartRequest files) throws IOException {
@@ -546,5 +545,69 @@ public class ZulinhetongController {
         }
     }
 
+    public List<String> getHeeler(String YongHuMing){
+        QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
+        yonghuguanliQueryWrapper.eq("Leader", YongHuMing).select("YongHuMing");
+        List<Yonghuguanli> list = yonghuguanliService.list(yonghuguanliQueryWrapper);
+        List<String> heeler = new ArrayList<>();
+        for (Yonghuguanli yonghuguanli : list){
+            heeler.add(yonghuguanli.getYonghuming());
+        }
+        log.info(heeler.toString());
+        return heeler;
+    }
+
+    @GetMapping("/heelerHeTong")
+    public ResponseResult<?> getHeelerHeTong(){
+        List<String> heeler = getHeeler(UserHolder.getUser().getUsername());
+        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        zulinhetongQueryWrapper.in("YeWuYuan", heeler);
+        List<Zulinhetong> list = zulinhetongService.list(zulinhetongQueryWrapper);
+        return ResponseResult.okResult(200, "操作成功", list);
+    }
+
+    private List<Liuchengjilu> getShenPi(String YongHuMing){
+        QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
+        zulinhetongQueryWrapper.eq("YeWuYuan", YongHuMing);
+        List<Zulinhetong> list = zulinhetongService.list(zulinhetongQueryWrapper);
+        List<Liuchengjilu> liuchengjilus = new ArrayList<>();
+        System.out.println(list);
+        QueryWrapper<Liuchengjilu> liuchengjiluQueryWrapper = new QueryWrapper<>();
+        for(Zulinhetong zulinhetong : list){
+            liuchengjiluQueryWrapper.orderBy(true,false, "id" ).last("limit 1").eq("YeWuBiaoShi", zulinhetong.getHetongbianhao()).eq("YongHuMing", YongHuMing);
+            Liuchengjilu liuchengjilu = liuchengjiluService.getOne(liuchengjiluQueryWrapper);
+            if (liuchengjilu != null){
+                liuchengjilus.add(liuchengjilu);
+            }
+        }
+        log.warn(liuchengjilus.toString());
+        return liuchengjilus;
+    }
+
+    @GetMapping("/shenpiList")
+    public ResponseResult<?> shenpiList(){
+        List<Liuchengjilu> shenPi = getShenPi(UserHolder.getUser().getUsername());
+        return ResponseResult.okResult(200, "操作成功", shenPi);
+    }
+
+    private Map<String, Object> getHeTongShenPiJingDu(String HeTongBianHao){
+        QueryWrapper<Liuchengdingyi> liuchengdingyiQueryWrapper = new QueryWrapper<>();
+        liuchengdingyiQueryWrapper.eq("YeWuMingCheng", "租赁合同");
+        List<Liuchengdingyi> list = liuchengdingyiService.list(liuchengdingyiQueryWrapper);
+
+        QueryWrapper<Liuchengjilu> liuchengjiluQueryWrapper = new QueryWrapper<>();
+        liuchengjiluQueryWrapper.orderBy(true,false, "id" ).last("limit 1").eq("YeWuBiaoShi", HeTongBianHao).eq("YongHuMing", UserHolder.getUser().getUsername());
+        Liuchengjilu liuchengjilu = liuchengjiluService.getOne(liuchengjiluQueryWrapper);
+
+        Map<String , Object> returnMap = new HashMap<>();
+        returnMap.put("ShenPiLiuCheng", list);
+        returnMap.put("ShenPiJinDu", liuchengjilu);
+        return returnMap;
+    }
+
+    @GetMapping("/shenpiJinDu/{HeTongBianHao}")
+    public ResponseResult<?> ShenPiJinDu(@PathVariable("HeTongBianHao") String HeTongBianHao){
+        return ResponseResult.okResult(200, "ok", getHeTongShenPiJingDu(HeTongBianHao));
+    }
 }
 

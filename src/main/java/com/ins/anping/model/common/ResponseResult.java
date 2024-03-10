@@ -56,6 +56,18 @@ public class ResponseResult<T> implements Serializable {
         return this;
     }
 
+    public ResponseResult<?> error(Integer code, String msg, T Data) {
+        this.code = code;
+        this.message = msg;
+        this.setData(Data);
+        return this;
+    }
+
+    public static ResponseResult errorResult(int code, String msg, Object Data) {
+        ResponseResult result = new ResponseResult();
+        return result.error(code, msg, Data);
+    }
+
 //    public ResponseResult<?> ok(Integer code, T data) {
 //        this.code = code;
 //        this.data = data;

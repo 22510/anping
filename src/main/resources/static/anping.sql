@@ -11,11 +11,26 @@
  Target Server Version : 80032
  File Encoding         : 65001
 
- Date: 09/03/2024 09:33:12
+ Date: 10/03/2024 21:19:36
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for caidanshoucang
+-- ----------------------------
+DROP TABLE IF EXISTS `caidanshoucang`;
+CREATE TABLE `caidanshoucang`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增',
+  `CaiDanJSON` json NULL COMMENT '收藏菜单名',
+  `YongHuMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户名',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of caidanshoucang
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for chaxiao
@@ -40,6 +55,39 @@ CREATE TABLE `chaxiao`  (
 -- ----------------------------
 -- Records of chaxiao
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for daibanshixiang
+-- ----------------------------
+DROP TABLE IF EXISTS `daibanshixiang`;
+CREATE TABLE `daibanshixiang`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `ShiXiangMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '待办事项名',
+  `ZhongYaoChengDu` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '重要程度',
+  `YongHuMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户名',
+  `NeiRong` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '待办内容',
+  `InsertTime` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '创建/插入时间',
+  `EndTime` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '截至时间',
+  `Statu` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '待办事项状态, 已完成/未完成/已删除',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of daibanshixiang
+-- ----------------------------
+INSERT INTO `daibanshixiang` VALUES (3, '123', '非常紧急', 'QeHing3', '123123', 'Sun Mar 10 10:49:14 CST 2024', 'Wed Mar 20 10:49:14 CST 2024', '已删除');
+INSERT INTO `daibanshixiang` VALUES (4, '测试时间', '非常紧急', 'QeHing3', '撒打发 阿斯蒂芬士大夫十分士大夫士大夫', '2024-03-10', '2024-03-13', '已完成');
+INSERT INTO `daibanshixiang` VALUES (5, '121', '比较紧急', 'QeHing3', '123123', '2024-03-10', '2024-03-13', '已完成');
+INSERT INTO `daibanshixiang` VALUES (6, '123', '非常紧急', 'QeHing3', '123', '2024-03-10', '2024-03-13', '已删除');
+INSERT INTO `daibanshixiang` VALUES (7, '合同待审核', '比较紧急', 'yewuzhuguan', '待审核, 合同编号013, 负责业务员:QeHing3', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (8, '合同待审核', '比较紧急', 'yewuzhuguan', '待审核, 合同编号015, 负责业务员:QeHing3', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (9, '合同待审核', '比较紧急', 'yewuzhuguan', '待审核, 合同编号016, 负责业务员:QeHing3', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (10, '合同待审核', '比较紧急', 'QeHing3', '待审核, 合同编号211, 负责业务员:yewuzhuguan', '2024-03-10', '2024-03-13', '已完成');
+INSERT INTO `daibanshixiang` VALUES (11, '合同待审核', '比较紧急', 'QeHing3', '待审核, 合同编号090, 负责业务员:yewuzhuguan', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (12, '合同待审核', '比较紧急', 'QeHing3', '待审核, 合同编号090, 负责业务员:yewuzhuguan', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (13, '合同待审核', '比较紧急', 'QeHing3', '待审核, 合同编号091, 负责业务员:yewuzhuguan', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (14, '合同待审核', '比较紧急', 'yewuzhuguan', '待审核, 合同编号658, 负责业务员:QeHing3', '2024-03-10', '2024-03-13', '未完成');
+INSERT INTO `daibanshixiang` VALUES (15, '合同待审核', '比较紧急', 'yewuzhuguan', '待审核, 合同编号123, 负责业务员:QeHing3', '2024-03-10', '2024-03-13', '未完成');
 
 -- ----------------------------
 -- Table structure for daishoutuihuo
@@ -695,6 +743,72 @@ CREATE TABLE `liangqiaju`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for liuchengdingyi
+-- ----------------------------
+DROP TABLE IF EXISTS `liuchengdingyi`;
+CREATE TABLE `liuchengdingyi`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `YeWuMingCheng` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '业务名称',
+  `LiuChengMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '流程名',
+  `ShunXu` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '顺序',
+  `JueSe` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '角色',
+  `FanWei` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '范围',
+  `BieMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '别名',
+  `TuiHuiWeiZhi` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '退回位置',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of liuchengdingyi
+-- ----------------------------
+INSERT INTO `liuchengdingyi` VALUES (1, '租赁合同', '租赁合同审批', '0', '8', '自己', '待审批', '0');
+INSERT INTO `liuchengdingyi` VALUES (2, '租赁合同', '租赁合同审批', '1', '9', '部门', '业务经理审批', '0');
+INSERT INTO `liuchengdingyi` VALUES (3, '租赁合同', '租赁合同审批', '2', '15', '全局', '副经理审批', '0');
+INSERT INTO `liuchengdingyi` VALUES (4, '租赁合同', '租赁合同审批', '3', '16', '全局', '总经理审批', '2');
+
+-- ----------------------------
+-- Table structure for liuchengjilu
+-- ----------------------------
+DROP TABLE IF EXISTS `liuchengjilu`;
+CREATE TABLE `liuchengjilu`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `YongHuMing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户名',
+  `LiuChengMingCheng` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '流程名称',
+  `ShunXu` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '执行所到节点',
+  `YeWuBiaoShi` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '业务标识(索引到具体业务信息)',
+  `time` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '时间',
+  `ChuLiJieGuo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '流程在该节点的处理结果(继续/回退)',
+  `BeiZhu` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '处理结果备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of liuchengjilu
+-- ----------------------------
+INSERT INTO `liuchengjilu` VALUES (1, 'QeHing3', '租赁合同审批', '0', '008', '24-3-9', '待审核', NULL);
+INSERT INTO `liuchengjilu` VALUES (2, 'QeHing3', '租赁合同审批', '1', '008', '24-3-10', '拒绝', NULL);
+INSERT INTO `liuchengjilu` VALUES (3, 'QeHing3', '租赁合同审批', '0', '008', '24-3-11', '待审核', NULL);
+INSERT INTO `liuchengjilu` VALUES (4, 'QeHing3', '租赁合同审批', '0', '009', '2024-03-10T13:40:50.562', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (10, 'QeHing3', '租赁合同审批', '1', '009', '2024-03-10T15:22:07.899', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (11, 'QeHing3', '租赁合同审批', '0', '009', '2024-03-10T15:38:03.850', '不通过', 'test');
+INSERT INTO `liuchengjilu` VALUES (12, 'QeHing3', '租赁合同审批', '0', '013', '2024-03-10T15:46:18.992', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (13, 'QeHing3', '租赁合同审批', '0', '013', '2024-03-10T15:58:55.331', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (14, 'QeHing3', '租赁合同审批', '0', '013', '2024-03-10T15:59:08.012', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (15, 'QeHing3', '租赁合同审批', '0', '015', '2024-03-10T16:34:45.880', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (16, 'QeHing3', '租赁合同审批', '0', '016', '2024-03-10T16:38:48.669', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (17, 'yewuzhuguan', '租赁合同审批', '0', '211', '2024-03-10T18:43:32.177', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (18, 'QeHing3', '租赁合同审批', '1', '008', '2024-03-10T18:44:57.676', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (19, 'QeHing3', '租赁合同审批', '1', '016', '2024-03-10T18:45:13.549', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (20, 'QeHing3', '租赁合同审批', '1', '016', '2024-03-10T18:45:20.028', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (21, 'QeHing3', '租赁合同审批', '1', '015', '2024-03-10T18:45:28.696', '通过', '');
+INSERT INTO `liuchengjilu` VALUES (22, 'yewuzhuguan', '租赁合同审批', '0', '090', '2024-03-10T18:51:56.829', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (23, 'yewuzhuguan', '租赁合同审批', '0', '090', '2024-03-10T18:52:09.688', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (24, 'yewuzhuguan', '租赁合同审批', '0', '091', '2024-03-10T18:52:40.123', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (25, 'QeHing3', '租赁合同审批', '0', '658', '2024-03-10T19:11:47.179', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (26, 'QeHing3', '租赁合同审批', '0', '123', '2024-03-10T19:16:23.164', '待审核', 'null');
+INSERT INTO `liuchengjilu` VALUES (27, 'QeHing3', '租赁合同审批', '1', '123', '2024-03-10T19:17:00.182', '通过', '');
+
+-- ----------------------------
 -- Table structure for mokuaifenpei
 -- ----------------------------
 DROP TABLE IF EXISTS `mokuaifenpei`;
@@ -1112,21 +1226,32 @@ CREATE TABLE `xiaoshouhetong`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `xiaoxituisonglog`;
 CREATE TABLE `xiaoxituisonglog`  (
-  `id` bigint NOT NULL COMMENT '消息通信记录ID',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息通信记录ID',
   `XiaoXiNeiRong` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容',
-  `FaSongFangId` bigint NOT NULL COMMENT '消息发送者的用户ID',
-  `JieShouFangId` bigint NOT NULL COMMENT '消息接收者的用户ID',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息状态: sent, read, 已发送, 已读',
+  `FaSongFangId` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息发送者的用户ID',
+  `JieShouFangId` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息接收者的用户ID',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '已发送' COMMENT '消息状态: sent, read, 已发送, 已读',
   `type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息类型: info, remind, warn, 通知, 提醒, 警告',
   `UserName` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户名, 执行此操作的用户信息 ( 不确定是否需要 )',
   `InsertTime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息发送时间',
   `UpdateTime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '消息更新时间 ( 可以用来记录接收方读取该消息的时间 )',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1766785319757905922 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of xiaoxituisonglog
 -- ----------------------------
+INSERT INTO `xiaoxituisonglog` VALUES (1766776897603862530, '有租赁合同需要审批, 合同编号:211, 负责业务员:yewuzhuguan', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:43:32.165', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766777256246214658, '合同编号:008审批结果为:通过.', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:44:57.682', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766777322814013442, '合同编号:016审批结果为:通过.', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:45:13.553', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766777349955354625, '合同编号:016审批结果为:通过.', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:45:20.031', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766777386336747521, '合同编号:015审批结果为:通过.', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:45:28.700', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766779014230016002, '有租赁合同需要审批, 合同编号:090, 负责业务员:yewuzhuguan', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:51:56.827', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766779068181348353, '有租赁合同需要审批, 合同编号:090, 负责业务员:yewuzhuguan', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:52:09.686', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766779195809824770, '有租赁合同需要审批, 合同编号:091, 负责业务员:yewuzhuguan', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T18:52:40.121', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766784006932365313, '有租赁合同需要审批, 合同编号:658, 负责业务员:QeHing3', 'QeHing3', 'yewuzhuguan', '已发送', 'info', NULL, '2024-03-10T19:11:47.178', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766785164535103490, '有租赁合同需要审批, 合同编号:123, 负责业务员:QeHing3', 'QeHing3', 'yewuzhuguan', '已发送', 'info', NULL, '2024-03-10T19:16:23.163', NULL);
+INSERT INTO `xiaoxituisonglog` VALUES (1766785319757905921, '合同编号:123审批结果为:通过.', 'yewuzhuguan', 'QeHing3', '已发送', 'info', NULL, '2024-03-10T19:17:00.185', NULL);
 
 -- ----------------------------
 -- Table structure for yibeihuoweifahuo
@@ -1173,27 +1298,29 @@ CREATE TABLE `yonghuguanli`  (
   `MiMa` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '密码',
   `ZhangHaoYouXiaoQi` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '账号有效期',
   `ZhuCeShiJian` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '注册时间',
+  `Leader` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '上级名字',
   `UserName` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '用户名',
   `InsertTime` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '新增记录时间',
   `UpdateTime` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '修改记录时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '用户管理' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '用户管理' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of yonghuguanli
 -- ----------------------------
-INSERT INTO `yonghuguanli` VALUES (1, 'admin', '1', '所内', '123', '12399', '超级管理员', '123@qq.com', '', '北京市东城区东单三条五号', '审核通过', 'c30807e6587ade285ba7ade9f881b3d7', '2026-12-12', '2023-12-12', NULL, NULL, NULL);
-INSERT INTO `yonghuguanli` VALUES (2, 'wangnan', '8', NULL, '1111', NULL, '王楠', '1212', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'cb4f3a43c8a976cd002ce822ad5c9d13', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 22:49:40', NULL);
-INSERT INTO `yonghuguanli` VALUES (3, 'dushuai', '9', NULL, '1111', NULL, '杜帅', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '92f21f1af6552e1e5e994b73b0199db3', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 22:53:43', NULL);
-INSERT INTO `yonghuguanli` VALUES (4, 'liuwenchuang', '10', NULL, '1111', NULL, '刘文创', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '3f214452232b765fe3c9c938685bd645', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 22:55:48', NULL);
-INSERT INTO `yonghuguanli` VALUES (5, 'fanzong', '11', NULL, '1111', NULL, '樊总', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '62e69a0028e7776f9fc4d22c56286b68', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:00:38', NULL);
-INSERT INTO `yonghuguanli` VALUES (6, 'xuechao', '12', NULL, '1111', NULL, '薛超', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'd7c14553857b418397d0d504713bbe98', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:02:34', NULL);
-INSERT INTO `yonghuguanli` VALUES (7, 'zhangshuai', '13', NULL, '1111', NULL, '张帅', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'e6950a217d774f491d3e786998223419', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:03:30', NULL);
-INSERT INTO `yonghuguanli` VALUES (8, 'lirongrong', '14', NULL, '1111', NULL, '李蓉蓉', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '826e172ed2f3104b54bb3e89dddc3bfc', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:04:28', NULL);
-INSERT INTO `yonghuguanli` VALUES (9, 'wanghuan', '15', NULL, '1111', NULL, '王欢', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '1e45f47fdea6017665fa87cb273bb9f6', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:05:55', NULL);
-INSERT INTO `yonghuguanli` VALUES (10, 'yuanzong', '16', NULL, '1111', NULL, '袁总', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'a20ce4bea5fbae01d4cb73afcca88602', '2026-12-12', '2023-12-12', 'cmxadmin', '2023-12-12 23:06:44', NULL);
-INSERT INTO `yonghuguanli` VALUES (14, 'QeHing3', '1', NULL, NULL, '18275823007', NULL, NULL, NULL, NULL, 'yes', 'sxfkpTVIL5MZclRCN1U3@80c0d7cb0ba29deb431cc8ab8d9e8dff', NULL, 'Thu Mar 07 15:44:40 CST 2024', NULL, 'Thu Mar 07 15:44:40 CST 2024', NULL);
-INSERT INTO `yonghuguanli` VALUES (15, NULL, '8', NULL, NULL, '17691281242', NULL, NULL, NULL, NULL, 'yes', 'mi1Hrfl7HyZKFUEGL30Q@6c6bc018134d209d0e65e2efbf171746', NULL, 'Sat Mar 09 00:49:42 CST 2024', NULL, 'Sat Mar 09 00:49:42 CST 2024', NULL);
+INSERT INTO `yonghuguanli` VALUES (1, 'admin', '1', '所内', '123', '12399', '超级管理员', '123@qq.com', '', '北京市东城区东单三条五号', '审核通过', 'c30807e6587ade285ba7ade9f881b3d7', '2026-12-12', '2023-12-12', NULL, NULL, NULL, NULL);
+INSERT INTO `yonghuguanli` VALUES (2, 'wangnan', '8', NULL, '1111', NULL, '王楠', '1212', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'cb4f3a43c8a976cd002ce822ad5c9d13', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 22:49:40', NULL);
+INSERT INTO `yonghuguanli` VALUES (3, 'dushuai', '9', NULL, '1111', NULL, '杜帅', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '92f21f1af6552e1e5e994b73b0199db3', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 22:53:43', NULL);
+INSERT INTO `yonghuguanli` VALUES (4, 'liuwenchuang', '10', NULL, '1111', NULL, '刘文创', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '3f214452232b765fe3c9c938685bd645', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 22:55:48', NULL);
+INSERT INTO `yonghuguanli` VALUES (5, 'fanzong', '11', NULL, '1111', NULL, '樊总', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '62e69a0028e7776f9fc4d22c56286b68', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:00:38', NULL);
+INSERT INTO `yonghuguanli` VALUES (6, 'xuechao', '12', NULL, '1111', NULL, '薛超', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'd7c14553857b418397d0d504713bbe98', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:02:34', NULL);
+INSERT INTO `yonghuguanli` VALUES (7, 'zhangshuai', '13', NULL, '1111', NULL, '张帅', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'e6950a217d774f491d3e786998223419', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:03:30', NULL);
+INSERT INTO `yonghuguanli` VALUES (8, 'lirongrong', '14', NULL, '1111', NULL, '李蓉蓉', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '826e172ed2f3104b54bb3e89dddc3bfc', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:04:28', NULL);
+INSERT INTO `yonghuguanli` VALUES (9, 'wanghuan', '15', NULL, '1111', NULL, '王欢', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', '1e45f47fdea6017665fa87cb273bb9f6', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:05:55', NULL);
+INSERT INTO `yonghuguanli` VALUES (10, 'yuanzong', '16', NULL, '1111', '123456789', '袁总', '', NULL, '陕西省渭南市临渭区双王街道菜鸟驿站', '审核通过', 'a20ce4bea5fbae01d4cb73afcca88602', '2026-12-12', '2023-12-12', NULL, 'cmxadmin', '2023-12-12 23:06:44', NULL);
+INSERT INTO `yonghuguanli` VALUES (14, 'QeHing3', '8', NULL, NULL, '18275823007', NULL, NULL, NULL, NULL, 'yes', 'sxfkpTVIL5MZclRCN1U3@80c0d7cb0ba29deb431cc8ab8d9e8dff', NULL, 'Thu Mar 07 15:44:40 CST 2024', 'yewuzhuguan', NULL, 'Thu Mar 07 15:44:40 CST 2024', NULL);
+INSERT INTO `yonghuguanli` VALUES (16, 'yewuzhuguan', '9', NULL, NULL, '15029795663', NULL, NULL, NULL, NULL, 'yes', 'Anb9Oc66CXnKJZTQlKeL@890ccb7ee4f7f32f81b4518694170aed', NULL, 'Sat Mar 09 14:40:59 CST 2024', 'QeHing3', NULL, 'Sat Mar 09 14:40:59 CST 2024', NULL);
+INSERT INTO `yonghuguanli` VALUES (17, 'LiuWenChuang', '8', NULL, NULL, '17691281242', NULL, NULL, NULL, NULL, 'yes', '72cG5KZxLF5F7QQ1pYUb@ad426096abfb99ac222bf12fb9fc44f3', NULL, 'Sat Mar 09 22:11:26 CST 2024', 'yewuzhuguan', NULL, 'Sat Mar 09 22:11:26 CST 2024', NULL);
 
 -- ----------------------------
 -- Table structure for ziliao4zulinhetong
@@ -1208,18 +1335,39 @@ CREATE TABLE `ziliao4zulinhetong`  (
   `InsertTime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '插入时间',
   `UpdateTime` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '租赁合同的资料表\r\n保存一份合同相关的图片和文档等.\r\n关联租赁合同表.' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '租赁合同的资料表\r\n保存一份合同相关的图片和文档等.\r\n关联租赁合同表.' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ziliao4zulinhetong
 -- ----------------------------
-INSERT INTO `ziliao4zulinhetong` VALUES (1, '002', 'hetong1_2.png', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\hetong1_2.png', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (2, '002', '0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段(1).pdf', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段(1).pdf', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (3, '002', 'hetong1_1.png', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\hetong1_1.png', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (4, '002', '0229泾开学校.pdf', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\0229泾开学校.pdf', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (5, '002', '0229泾开学校.pdf', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\0229泾开学校.pdf', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (6, '002', 'anping.sql', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\anping.sql', NULL, NULL, NULL);
-INSERT INTO `ziliao4zulinhetong` VALUES (7, '002', 'anping.sql', 'E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\anping.sql', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (34, '007', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/007/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (35, '007', '0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段.pdf', '/007/0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段.pdf', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (36, '007', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/007/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (37, '010', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/010/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (38, '010', '0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段.pdf', '/010/0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段.pdf', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (39, '010', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/010/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (40, '012', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/012/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (41, '012', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/012/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (42, '009', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/009/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (43, '009', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/009/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (44, '013', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/013/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (45, '013', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/013/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (46, '015', 'hetong2_3.png', '/015/hetong2_3.png', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (47, '015', '合同.jpg', '/015/合同.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (48, '015', 'hetong2_1.png', '/015/hetong2_1.png', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (49, '015', 'hetong2_2.png', '/015/hetong2_2.png', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (50, '015', '0229泾开学校.pdf', '/015/0229泾开学校.pdf', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (51, '016', 'file-1710059928159', '/016/file-1710059928159', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (52, '211', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/211/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (53, '211', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/211/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (54, '090', 'file-1710067916971', '/090/file-1710067916971', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (55, '090', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/090/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (56, '090', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/090/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (57, '091', 'bb783a98d4c7bebc508c4948d4e9550.jpg', '/091/bb783a98d4c7bebc508c4948d4e9550.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (58, '091', 'bcbc4c35b2368bee9bc965e293ae3e9.jpg', '/091/bcbc4c35b2368bee9bc965e293ae3e9.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (59, '658', '1710069104603_IMG20240309020852.jpg', '/658/1710069104603_IMG20240309020852.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (60, '658', '1710069104907_IMG20240309020901.jpg', '/658/1710069104907_IMG20240309020901.jpg', NULL, NULL, NULL);
+INSERT INTO `ziliao4zulinhetong` VALUES (61, '123', '1710069381683_mmexport1709904131883.jpg', '/123/1710069381683_mmexport1709904131883.jpg', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for zlugang
@@ -1265,24 +1413,33 @@ CREATE TABLE `zulinhetong`  (
   `QiShiRiQi` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '起始日期',
   `JieZhiRiQi` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '截至日期',
   `WuLiaoYunFei` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '物料运费',
-  `HeTongTuPian` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL COMMENT '合同图片',
+  `HeTongTuPian` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL COMMENT '合同资料: 数量',
   `HeTongFuJiaXinXi` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '合同附加信息',
   `BeiZhuYuanYin` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注原因',
   `YeWuYuan` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '业务员',
-  `HeTongZhiXingJinDu` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '合同执行进度',
+  `HeTongZhiXingJinDu` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT '待审核' COMMENT '合同执行进度: 待审核, 审批中, 待备货, 待发货, 发货中, 租赁中, 退货中, 已完成. 已作废.',
   `UserName` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '用户名',
   `InsertTime` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '新增记录时间',
   `UpdateTime` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '修改记录时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '租赁合同' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '租赁合同' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of zulinhetong
 -- ----------------------------
-INSERT INTO `zulinhetong` VALUES (2, 'hetongbianhao_a7341c3133eb', 'xiangmumingcheng_0139d6771b60', 'chuzudanwei_38de402627fb', 'chengzudanwei_3711273b9bdd', 'chengzufangshehuixinxidaima_35ee0b3bda32', 'chengzufangkaihuxing_c818cf76667f', 'xiangmudizhi_168f1e502f00', 'jieshouren_9982210b7c05', 'jieshourenlianxifangshi_98f9488617e1', 'hetongleixing_e2e6b009d638', 'qishiriqi_d67ba6d98344', 'jiezhiriqi_19028a1262ad', 'wuliaoyunfei_6b3dc80b7765', 'hetongtupian_af8cf9a9f004', 'hetongfujiaxinxi_7ec45f654e78', 'beizhuyuanyin_98355d248cd1', 'yewuyuan_1c62237f5ab7', 'hetongzhixingjindu_969682d77b9a', 'username_91de370f6d2d', 'inserttime_d2c536a7bb75', 'updatetime_1c88ae17088f');
-INSERT INTO `zulinhetong` VALUES (4, '002', 'xxxxx项目', '1', '安平建筑公司', '1000000000000', '招商银行', '陕西省西安市', '张三', '18064357551', '租赁', '2023-12-26', '2024-12-26', '1', '{anping.sql=E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\anping.sql}{anping.sql=E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\anping.sql}{0229泾开学校.pdf=E:\\Coding\\Java\\anping\\ZuLinHeTongGuanli\\002\\0229泾开学校.pdf}', NULL, NULL, NULL, NULL, 'cmxadmin', '2023-12-26 11:38:26', NULL);
-INSERT INTO `zulinhetong` VALUES (5, '1088', 'xiangmumingcheng_0139d6771b60', 'chuzudanwei_38de402627fb', 'chengzudanwei_3711273b9bdd', 'chengzufangshehuixinxidaima_35ee0b3bda32', 'chengzufangkaihuxing_c818cf76667f', 'xiangmudizhi_168f1e502f00', 'jieshouren_9982210b7c05', 'jieshourenlianxifangshi_98f9488617e1', 'hetongleixing_e2e6b009d638', 'qishiriqi_d67ba6d98344', 'jiezhiriqi_19028a1262ad', 'wuliaoyunfei_6b3dc80b7765', 'hetongtupian_af8cf9a9f004', 'hetongfujiaxinxi_7ec45f654e78', 'beizhuyuanyin_98355d248cd1', 'yewuyuan_1c62237f5ab7', 'hetongzhixingjindu_969682d77b9a', 'username_91de370f6d2d', 'inserttime_d2c536a7bb75', 'updatetime_1c88ae17088f');
-INSERT INTO `zulinhetong` VALUES (30, '10099', 'xiangmumingcheng_0139d6771b60', 'chuzudanwei_38de402627fb', 'chengzudanwei_3711273b9bdd', 'chengzufangshehuixinxidaima_35ee0b3bda32', 'chengzufangkaihuxing_c818cf76667f', 'xiangmudizhi_168f1e502f00', 'jieshouren_9982210b7c05', 'jieshourenlianxifangshi_98f9488617e1', 'hetongleixing_e2e6b009d638', 'qishiriqi_d67ba6d98344', 'jiezhiriqi_19028a1262ad', 'wuliaoyunfei_6b3dc80b7765', 'hetongtupian_af8cf9a9f004', 'hetongfujiaxinxi_7ec45f654e78', 'beizhuyuanyin_98355d248cd1', 'yewuyuan_1c62237f5ab7', 'hetongzhixingjindu_969682d77b9a', 'username_91de370f6d2d', 'inserttime_d2c536a7bb75', 'updatetime_1c88ae17088f');
+INSERT INTO `zulinhetong` VALUES (31, '008', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', NULL, NULL, '', 'QeHing3', '审核中', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (32, '007', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/007/bb783a98d4c7bebc508c4948d4e9550.jpg, /007/0307广东九为中粮粮谷渭南新建90万吨年小麦加工项目土建施工一标段.pdf, /007/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', NULL, '', 'QeHing3', '待备货', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (34, '012', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '1424324', '中国银行', '陕西省西安市XXXXX', '刘文创', '4324325334', '租赁', '2023-12-26', '2024-12-26', '', '[/012/bb783a98d4c7bebc508c4948d4e9550.jpg, /012/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'LiuWenChuang', '待审核', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (35, '009', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/009/bb783a98d4c7bebc508c4948d4e9550.jpg, /009/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'QeHing3', '审核中', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (36, '013', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/013/bb783a98d4c7bebc508c4948d4e9550.jpg, /013/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'QeHing3', '审核中', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (37, '015', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '123', '345', '陕西省西安市XXXXX', '123', '123', '租赁', '2023-12-26', '2024-12-26', '我方', '[/015/hetong2_3.png, /015/合同.jpg, /015/hetong2_1.png, /015/hetong2_2.png, /015/0229泾开学校.pdf]', '', '123', 'QeHing3', '审核中', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (38, '016', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/016/file-1710059928159]', '', '', 'QeHing3', '审核中', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (39, '211', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/211/bb783a98d4c7bebc508c4948d4e9550.jpg, /211/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'yewuzhuguan', '待审批', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (40, '090', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/090/file-1710067916971]', '', '', 'yewuzhuguan', '待审批', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (41, '090', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/090/file-1710067916971, /090/bb783a98d4c7bebc508c4948d4e9550.jpg, /090/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'yewuzhuguan', '待审批', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (42, '091', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/091/bb783a98d4c7bebc508c4948d4e9550.jpg, /091/bcbc4c35b2368bee9bc965e293ae3e9.jpg]', '', '', 'yewuzhuguan', '待审批', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (43, '658', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/658/1710069104603_IMG20240309020852.jpg, /658/1710069104907_IMG20240309020901.jpg]', '', '', 'QeHing3', '待审批', NULL, NULL, NULL);
+INSERT INTO `zulinhetong` VALUES (44, '123', 'xxxxx项目', '安平建筑公司', '安平建筑公司', '', '', '陕西省西安市XXXXX', '', '', '租赁', '2023-12-26', '2024-12-26', '', '[/123/1710069381683_mmexport1709904131883.jpg]', '', '', 'QeHing3', '审核中', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for zulinhetongshenpi

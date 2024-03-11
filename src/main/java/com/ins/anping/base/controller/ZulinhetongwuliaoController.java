@@ -2,18 +2,15 @@ package com.ins.anping.base.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.base.entity.Zulinhetongwuliao;
-import com.ins.anping.base.service.impl.ZulinhetongwuliaoServiceImpl ;
+import com.ins.anping.base.service.impl.ZulinhetongwuliaoServiceImpl;
+import com.ins.anping.model.common.ResponseResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
@@ -42,7 +39,7 @@ public class ZulinhetongwuliaoController {
         return ResponseResult.errorResult(500, "操作失败");
     }
 
-        @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseResult<?> getById(@PathVariable Long id){
         Zulinhetongwuliao result = zulinhetongwuliaoService.getById(id);
         if (result != null) {

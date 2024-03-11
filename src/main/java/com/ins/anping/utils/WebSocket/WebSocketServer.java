@@ -28,13 +28,21 @@ public class WebSocketServer {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("yonghuming") String yonghuming) {
+        // 对于同一用户多地登录, 要关闭前一个地点的连接, 否则消息会发往前一个地点.
+//        for (WebSocketServer item : WEB_SOCKET_SERVERS) {
+//            if (item.yonghuming.equals(yonghuming)) {
+//                WEB_SOCKET_SERVERS.remove(this);
+//                //从set中删除
+//                subOnlineCount();
+//                //在线数减1
+//            }
+//        }
         this.session = session;
         WEB_SOCKET_SERVERS.add(this);
         //加入set中
         addOnlineCount();
         //在线数加1
         this.yonghuming = yonghuming;
-        sendMessage(yonghuming + "用户" + ", 连接成功 !");
 
         System.out.println("【websocket】" + yonghuming + "用户" + "已连接！当前在线人数为" + getOnlineCount());
     }
@@ -57,7 +65,6 @@ public class WebSocketServer {
             return;
         }
         this.session = session;
-        sendMessage("【websocket】 服务端收到来自窗口" + yonghuming + "发送的消息：" + message);
     }
 
     @OnError
@@ -87,12 +94,12 @@ public class WebSocketServer {
      * 群发自定义消息
      */
     public static void sendInfo(String yonghuming, String message) {
-        System.out.println("【websocket】From<" + UserHolder.getUser().getUsername() + "> To <" + yonghuming + ">用户" + "，推送内容:" + message);
         for (WebSocketServer item : WEB_SOCKET_SERVERS) {
             //这里可以设定只推送给这个userId的，为null则全部推送
             if (yonghuming == null) {
                 item.sendMessage(message);
             } else if (item.yonghuming.equals(yonghuming)) {
+                log.info("【websocket】From<" + UserHolder.getUser().getUsername() + "> To <" + yonghuming + ">用户" + "，推送内容:" + message);
                 item.sendMessage(message);
             }
         }

@@ -1,15 +1,12 @@
 package com.ins.anping.other;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.utils.WebSocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,12 +22,11 @@ public class WebSocketController {
     private WebSocketServer webSocketServer;
     // 推送数据到websocket客户端 接口
     @PostMapping("/push/{yonghuming}")
-    public ResponseResult<?> pushMessage(@PathVariable("yonghuming") String yonghuming, String message) {
-        Map<String, Object> result = new HashMap<>();
-        WebSocketServer.sendInfo(yonghuming, message);
-        result.put("消息接收方", yonghuming);
-        result.put("msg", message);
-        return ResponseResult.okResult(200, "消息推送成功", result);
+    public ResponseResult<?> pushMessage(@PathVariable("yonghuming") String yonghuming, @RequestBody Map<String, String> message) {
+        WebSocketServer.sendInfo(yonghuming, new JSONObject(message).toString());
+//        result.put("消息接收方", yonghuming);
+//        result.put("msg", message);
+        return ResponseResult.okResult(200, "消息推送成功", message.toString());
     }
 
 //    @PostMapping("/push/{cid}")

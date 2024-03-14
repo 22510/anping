@@ -58,8 +58,8 @@ public class ZulinhetongwuliaoController {
     }
 
     @PostMapping
-    public ResponseResult<?> save(@RequestBody Zulinhetongwuliao zulinhetongwuliao){
-        if (zulinhetongwuliaoService.save(zulinhetongwuliao)){
+    public ResponseResult<?> save(@RequestBody List<Zulinhetongwuliao> zulinhetongwuliao){
+        if (zulinhetongwuliaoService.saveBatch(zulinhetongwuliao)){
             return ResponseResult.okResult(200, "操作成功", null);
         }
         return ResponseResult.errorResult(500, "操作失败");

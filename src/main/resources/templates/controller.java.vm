@@ -1,8 +1,8 @@
 package ${package.Controller};
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ins.anping.model.common.ResponseResult;
 import ${package.Entity}.${entity};
 import ${package.Service}.impl.${table.serviceImplName} ;
 import io.swagger.annotations.ApiOperation;
@@ -10,7 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+
+// 以下内容需要根据实际情况修改
+import com.ins.anping.model.common.ResponseResult;
+import com.ins.anping.model.common.QueryDto;
+
 
 
 #if(${restControllerStyle})
@@ -56,33 +62,51 @@ public class ${table.controllerName} {
     @GetMapping("")
     public ResponseResult<?> list(){
         List<${entity}> list= $!{table.entityPath}Service.list();
-        if(!list.isEmpty()){
-            return ResponseResult.okResult(200, "success", list);
+        try{
+            if(!list.isEmpty()){
+                return ResponseResult.okResult(200, "success", list);
+            }else{
+                return ResponseResult.okResult(200, "success", new ArrayList<>());
+            }
+        }catch (Exception e){
+            log.error("[MyBatisPlus] 查询所有$!{table.comment} 发生异常", e);
+            return ResponseResult.errorResult(500, "操作失败");
         }
-        return ResponseResult.errorResult(500, "操作失败");
     }
 
-    ##    @ApiOperation("获取$!{table.comment}详细信息")
+    @ApiOperation("获取$!{table.comment}详细信息")
     @GetMapping(value = "/{id}")
     public ResponseResult<?> getById(@PathVariable Long id){
         ${entity} result = $!{table.entityPath}Service.getById(id);
-        if (result != null) {
-            return ResponseResult.okResult(200, "success", result);
+        try{
+            if (result != null) {
+                return ResponseResult.okResult(200, "success", result);
+            }else{
+                return ResponseResult.okResult(200, "success", new ArrayList<>());
+            }
+        }catch (Exception e){
+            log.error("[MyBatisPlus] 获取$!{table.comment}详细信息 发生异常", e);
+            return ResponseResult.errorResult(500, "操作失败");
         }
-        return ResponseResult.errorResult(500, "操作失败");
     }
 
-##    @ApiOperation("分页查询$!{table.comment}")
+    @ApiOperation("分页查询$!{table.comment}")
     @GetMapping("/page")
     public ResponseResult<?> page(@RequestBody Page<${entity}> page){
         IPage<${entity}> $!{table.entityPath}IPage= $!{table.entityPath}Service.page(page);
-        if($!{table.entityPath}IPage != null) {
-            return ResponseResult.okResult(200, "success", $!{table.entityPath}IPage);
+        try{
+            if($!{table.entityPath}IPage != null) {
+                return ResponseResult.okResult(200, "success", $!{table.entityPath}IPage);
+            }else{
+                return ResponseResult.okResult(200, "success", new ArrayList<>());
+            }
+        }catch (Exception e){
+            log.error("[MyBatisPlus] 分页查询$!{table.comment} 发生异常", e);
+            return ResponseResult.errorResult(500, "操作失败");
         }
-        return ResponseResult.errorResult(500, "操作失败");
     }
 
-##    @ApiOperation("新增$!{table.comment}")
+    @ApiOperation("新增$!{table.comment}")
     @PostMapping
     public ResponseResult<?> save(@RequestBody ${entity} ${table.entityPath}){
         if (${table.entityPath}Service.save(${table.entityPath})){
@@ -91,7 +115,7 @@ public class ${table.controllerName} {
         return ResponseResult.errorResult(500, "操作失败");
     }
 
-##    @ApiOperation("修改$!{table.comment}")
+    @ApiOperation("修改$!{table.comment}")
     @PutMapping
     public ResponseResult<?> updateById(@RequestBody ${entity} ${table.entityPath}){
         if (${table.entityPath}Service.updateById(${table.entityPath})){
@@ -100,13 +124,36 @@ public class ${table.controllerName} {
         return ResponseResult.errorResult(500, "操作失败");
     }
 
-##    @ApiOperation("删除$!{table.comment}")
+    @ApiOperation("删除$!{table.comment}")
     @DeleteMapping("/{id}")
     public ResponseResult<?> remove(@PathVariable Long id){
         if (${table.entityPath}Service.removeById(id)){
             return ResponseResult.okResult(200, "success", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
+    }
+
+    @ApiOperation("条件查询$!{table.comment}")
+    @PostMapping("/conditionQuery")
+    public ResponseResult<?> conditionQuery(@RequestBody List<QueryDto> queryDtoList){
+        try{
+            QueryWrapper<${entity}> queryWrapper = new QueryWrapper<>();
+            queryDtoList.forEach((queryDto -> {
+                if(queryDto.getIsLike() == 0){
+                    queryWrapper.eq(queryDto.getField(), queryDto.getValue());
+                }else{
+                    queryWrapper.like(queryDto.getField(), queryDto.getValue());
+                }
+            }));
+            List<${entity}> list = ${table.entityPath}Service.list(queryWrapper);
+            if (list.isEmpty()){
+                return ResponseResult.okResult(200, "success", new ArrayList<>());
+            }else {
+                return ResponseResult.okResult(200, "success", list);
+            }
+        }catch (Exception e){
+            return ResponseResult.errorResult(500, "操作失败");
+        }
     }
 }
 

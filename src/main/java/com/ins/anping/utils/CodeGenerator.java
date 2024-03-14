@@ -1,4 +1,4 @@
-package com.ins.anping;
+package com.ins.anping.utils;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
@@ -15,15 +15,14 @@ import java.util.Scanner;
 public class CodeGenerator {
 
     public static void main(String[] args) {
-        log.warn("!!!!是否要进行代码生成!!!!----以实现重要代码是否做好备份!!!!");
-        log.warn("确认生成, 请命令行输入 (1) ");
+        log.warn("!!!!是否要进行代码生成!!!!----已实现重要代码是否做好备份!!!!");
+        log.warn("确认生成命令行输入 yes; 取消生成命令行输入 no");
         Scanner scanner = new Scanner(System.in);
-        if (scanner.nextInt() != 1){
+        if (scanner.nextLine().equals("no")){
             log.warn("终止代码生成...");
             throw new RuntimeException("终止代码生成");
         }
-        scanner.nextLine();
-        System.out.println("若要生成指定表, 请输入表名; 若全库生成, 直接回车");
+        System.out.println("若要生成指定表, 请输入表名; 若全库生成, 直接回车; \n若生成指定多表, 请输入: {table1,table2...}");
         String tableName = scanner.nextLine();
         System.out.println("生成表{"+tableName+"}");
         // 代码生成器
@@ -75,7 +74,12 @@ public class CodeGenerator {
         // 是否生成Restful风格的控制器, 就是前后端分离, Json传数据?
         strategy.setRestControllerStyle(true);
         // 需要包含的表名, enableSqlFilter为false时, 允许正则表达式
-        strategy.setInclude(tableName);
+        System.out.println(tableName.isEmpty());
+        if (tableName.isEmpty()){
+            strategy.setInclude();
+        }else {
+            strategy.setInclude(tableName.split(","));
+        }
         // 驼峰转连字符(用-连接单词)
         strategy.setControllerMappingHyphenStyle(true);
         // 去掉表前缀? 还是增加??? 但目前无影响
@@ -96,9 +100,9 @@ public class CodeGenerator {
                         + "/" + tableInfo.getEntityName() + "Controller" + StringPool.DOT_JAVA;
             }
         });
-
         log.info("MyBatisPlus代码逆向生成");
         mpg.execute();
+        log.info("代码生成所在路径: CodeGenerator同级目录的<base>文件夹");
     }
 
 }

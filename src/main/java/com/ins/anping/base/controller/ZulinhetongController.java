@@ -1,5 +1,6 @@
 package com.ins.anping.base.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,7 +9,6 @@ import com.ins.anping.base.service.impl.*;
 import com.ins.anping.model.common.ResponseResult;
 import com.ins.anping.utils.OCRByBaiDu.AccurateBasic;
 import com.ins.anping.utils.UserHolder;
-import com.ins.anping.utils.WebSocket.WebSocketServer;
 import com.ins.anping.utils.fileSave.SaveLocal;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -40,10 +41,6 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("api/busi/table/zulinhetong")
 public class ZulinhetongController {
-
-
-    @Autowired
-    private ZulinhetongwuliaoServiceImpl zulinhetongwuliaoService;
 
     @Autowired
     private FukuanjiedianServiceImpl fukuanjiedianService;
@@ -60,6 +57,7 @@ public class ZulinhetongController {
     @ApiOperation("查询该业务员的所有租赁合同")
     @GetMapping("/list")
     public ResponseResult<?> list() {
+        // 业务员: 看到自己的; 业务经理: 看到其下所有业务员的
         if (UserHolder.getUser().getJueSe().equals("8")) {
             QueryWrapper<Zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
             System.out.println(UserHolder.getUser().getUsername());
@@ -98,120 +96,184 @@ public class ZulinhetongController {
     }
 
     @Autowired
-    private WebSocketServer webSocketServer;
-
-    @Autowired
-    private XiaoxituisonglogServiceImpl xiaoxituisonglogService;
-
-    @Autowired
     private LiuchengdingyiServiceImpl liuchengdingyiService;
 
     @Autowired
     private LiuchengjiluServiceImpl liuchengjiluService;
 
+    @Autowired
+    private MessageLogServiceImpl messageLogService;
+
+    @Autowired
+    private ZulinhetongwuliaoServiceImpl zulinhetongwuliaoService;
+
+    /**
+     * 合同初次录入, 新的合同流程建立
+     */
+    @Transactional
     @PostMapping
-    public ResponseResult<?> save(@RequestBody Zulinhetong zulinhetong) {
-//        System.out.println(zulinhetong);
+    public ResponseResult<?> save(@RequestBody Map<String, Object> map) {
+
+//        租赁合同信息保存
+        Zulinhetong zulinhetong = BeanUtil.toBean(map, Zulinhetong.class);
         QueryWrapper<Ziliao4zulinhetong> zulinhetongQueryWrapper = new QueryWrapper<>();
         zulinhetongQueryWrapper.eq("HeTongBianHao", zulinhetong.getHetongbianhao());
-        List<Ziliao4zulinhetong> list = ziliao4zulinhetongService.list(zulinhetongQueryWrapper);
-
-        zulinhetong.setYewuyuan(UserHolder.getUser().getUsername());
-
-        List<String> urls = new ArrayList<>();
-        for (Ziliao4zulinhetong str : list) {
-            urls.add(str.getZiliaopath());
-        }
-        zulinhetong.setHetongtupian(urls.toString());
+        zulinhetong.setHetongtupian(ziliao4zulinhetongService.list(zulinhetongQueryWrapper)
+                .stream()
+                .map(Ziliao4zulinhetong::getZiliaopath)
+                .collect(Collectors.joining(", "))); // 使用String.join而不是List的toString，以获得更好的格式控制
         zulinhetong.setHetongzhixingjindu("待审核");
         QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
         yonghuguanliQueryWrapper.eq("YongHuMing", UserHolder.getUser().getUsername());
         Yonghuguanli yonghuguanli = yonghuguanliService.getOne(yonghuguanliQueryWrapper);
-//        log.info(yonghuguanli.toString());
+        log.warn(zulinhetong.toString());
+        boolean zulinhetong_save = zulinhetongService.save(zulinhetong);
 
-        if (zulinhetongService.save(zulinhetong)) {
-            String xiaoxiNeiRong = "有租赁合同需要审批, 合同编号:" + zulinhetong.getHetongbianhao() + ", 负责业务员:" + UserHolder.getUser().getUsername();
-            Map<String, String> xiaoxi = new HashMap<>();
-            xiaoxi.put("title", "合同审批");
-            xiaoxi.put("neirong", xiaoxiNeiRong);
-            xiaoxi.put("type", "info");
-            // xiaoxi.put
-//            System.out.println(yonghuguanli.getLeader());
-            JSONObject json = new JSONObject(xiaoxi);
-            WebSocketServer.sendInfo(yonghuguanli.getLeader(),json.toString());
-            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
-            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
-            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
-            xiaoxituisonglog.setJieshoufangid(yonghuguanli.getLeader());
-            xiaoxituisonglog.setType("info");
-            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
-            xiaoxituisonglogService.save(xiaoxituisonglog);
+//        合同物料信息保存, 调用合同物料的Controller吧.
 
-            Liuchengjilu liuchengjilu = new Liuchengjilu();
-            liuchengjilu.setYonghuming(UserHolder.getUser().getUsername());
-            liuchengjilu.setLiuchengmingcheng("租赁合同审批");
-            liuchengjilu.setShunxu("0");
-            liuchengjilu.setYewubiaoshi(zulinhetong.getHetongbianhao());
-            liuchengjilu.setTime(LocalDateTime.now().toString());
-            liuchengjilu.setChulijieguo("待审核");
-            liuchengjilu.setBeizhu("null");
-            liuchengjiluService.save(liuchengjilu);
 
-            Daibanshixiang daibanshixiang = new Daibanshixiang();
-            daibanshixiang.setStatu("未完成");
-            daibanshixiang.setShixiangming("合同待审核");
-            daibanshixiang.setZhongyaochengdu("比较紧急");
-            daibanshixiang.setYonghuming(yonghuguanli.getLeader());
-            daibanshixiang.setNeirong("待审核, 合同编号"+zulinhetong.getHetongbianhao()+", 负责业务员:"+zulinhetong.getYewuyuan());
+//        通知相关部门
+        if (zulinhetong_save) {
             LocalDate today = LocalDate.now();
-            daibanshixiang.setInserttime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
-            daibanshixiang.setEndtime(today.plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
-            daibanshixiangService.save(daibanshixiang);
+//            通知业务经理, 审核合同
+            Liuchengjilu liuchengjilu_yewujinglishenhe = new Liuchengjilu();
+            liuchengjilu_yewujinglishenhe.setYonghuming(UserHolder.getUser().getUsername());
+            liuchengjilu_yewujinglishenhe.setLiuchengmingcheng("租赁合同相关流程");
+            liuchengjilu_yewujinglishenhe.setShunxu("0");
+            liuchengjilu_yewujinglishenhe.setYewubiaoshi(zulinhetong.getHetongbianhao());
+            liuchengjilu_yewujinglishenhe.setTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            liuchengjilu_yewujinglishenhe.setChulijieguo("待审核");
+            liuchengjilu_yewujinglishenhe.setBeizhu("null");
+            liuchengjiluService.save(liuchengjilu_yewujinglishenhe);
 
+            Daibanshixiang daibanshixiang_yewujingli = new Daibanshixiang();
+            daibanshixiang_yewujingli.setStatu("未完成");
+            daibanshixiang_yewujingli.setShixiangming("合同待审核");
+            daibanshixiang_yewujingli.setZhongyaochengdu("比较紧急");
+            daibanshixiang_yewujingli.setYonghuming(yonghuguanli.getLeader());
+            daibanshixiang_yewujingli.setNeirong("待审核, 合同编号"+zulinhetong.getHetongbianhao()+", 负责业务员:"+zulinhetong.getYewuyuan());
+            daibanshixiang_yewujingli.setInserttime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiang_yewujingli.setEndtime(today.plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiangService.save(daibanshixiang_yewujingli);
+
+            MessageLog messageLog_yewujingli = BeanUtil.toBean(map, MessageLog.class);
+            messageLog_yewujingli.setIsSystemMessage("false");
+            messageLog_yewujingli.setSendTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            messageLog_yewujingli.setStatus("no");
+            messageLog_yewujingli.setType("warn");
+            messageLogService.save(messageLog_yewujingli);
+//            通知库房, 检查库房存量, 判断是否需要转租业务
+            /**
+             * TODO: 库房相关待完善:
+             * 1. 合同物料录入
+             */
+            //            List<Zulinhetongwuliao> zulinhetongwuliao_list = new ArrayList<>();
+            //            // 从前端传回的内容取, 假设是个List
+            //            map.get("合同物料");
+            //            zulinhetongwuliao_list.add(new Zulinhetongwuliao());
+            //            zulinhetongwuliaoService.saveBatch(zulinhetongwuliao_list);
+
+            Daibanshixiang daibanshixiang_kufang = new Daibanshixiang();
+            daibanshixiang_kufang.setStatu("未完成");
+            daibanshixiang_kufang.setShixiangming("合同待备货");
+            daibanshixiang_kufang.setZhongyaochengdu("比较紧急");
+            daibanshixiang_kufang.setYonghuming("库房名字");
+            daibanshixiang_kufang.setNeirong("待备货, 合同编号"+zulinhetong.getHetongbianhao()+", 负责业务员:"+zulinhetong.getYewuyuan());
+            daibanshixiang_kufang.setInserttime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiang_kufang.setEndtime(today.plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+            MessageLog messageLog_kufang = BeanUtil.toBean(map, MessageLog.class);
+            messageLog_kufang.setIsSystemMessage("false");
+            messageLog_kufang.setSendTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            messageLog_kufang.setStatus("no");
+            messageLog_kufang.setType("warn");
+            messageLogService.save(messageLog_kufang);
+
+            // TODO: 待思考, 可能这套消息系统是冗余的...
             return ResponseResult.okResult(200, "操作成功", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
     }
 
+    /**
+     * 合同相关内容更新
+     */
+    @Transactional
     @PutMapping
-    public ResponseResult<?> updateById(@RequestBody Zulinhetong zulinhetong) {
-
-        if (zulinhetongService.updateById(zulinhetong)) {
+    public ResponseResult<?> updateById(Map<String, Object> map) {
+        Zulinhetong zulinhetong = BeanUtil.toBean(map, Zulinhetong.class);
+        boolean hetong_update = zulinhetongService.updateById(zulinhetong);
+        if (hetong_update) {
+            /**
+             * 合同状态修改, 需要通知业务经理和库房查看合同内容.
+             */
             QueryWrapper<Yonghuguanli> yonghuguanliQueryWrapper = new QueryWrapper<>();
             yonghuguanliQueryWrapper.eq("YongHuMing", UserHolder.getUser().getUsername());
             Yonghuguanli yonghuguanli = yonghuguanliService.getOne(yonghuguanliQueryWrapper);
 
-            String xiaoxiNeiRong = "有租赁合同需要审批, 合同编号:" + zulinhetong.getHetongbianhao() + ", 负责业务员:" + UserHolder.getUser().getUsername();
-            Map<String, String> xiaoxi = new HashMap<>();
-            xiaoxi.put("neirong", xiaoxiNeiRong);
-            xiaoxi.put("type", "info");
-            // xiaoxi.put
-//            System.out.println(yonghuguanli.getLeader());
-            JSONObject json = new JSONObject(xiaoxi);
-            WebSocketServer.sendInfo(yonghuguanli.getLeader(), json.toString());
-            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
-            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
-            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
-            xiaoxituisonglog.setJieshoufangid(yonghuguanli.getLeader());
-            xiaoxituisonglog.setType("info");
-            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
-            xiaoxituisonglogService.save(xiaoxituisonglog);
+            LocalDate today = LocalDate.now();
+//            通知业务经理, 审核合同
+            Liuchengjilu liuchengjilu_yewujinglishenhe = new Liuchengjilu();
+            liuchengjilu_yewujinglishenhe.setYonghuming(UserHolder.getUser().getUsername());
+            liuchengjilu_yewujinglishenhe.setLiuchengmingcheng("租赁合同相关流程");
+            liuchengjilu_yewujinglishenhe.setShunxu("0");
+            liuchengjilu_yewujinglishenhe.setYewubiaoshi(zulinhetong.getHetongbianhao());
+            liuchengjilu_yewujinglishenhe.setTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            liuchengjilu_yewujinglishenhe.setChulijieguo("待审核");
+            liuchengjilu_yewujinglishenhe.setBeizhu("null");
+            liuchengjiluService.save(liuchengjilu_yewujinglishenhe);
 
-            Liuchengjilu liuchengjilu = new Liuchengjilu();
-            liuchengjilu.setYonghuming(UserHolder.getUser().getUsername());
-            liuchengjilu.setLiuchengmingcheng("租赁合同审批");
-            liuchengjilu.setShunxu("0");
-            liuchengjilu.setYewubiaoshi(zulinhetong.getHetongbianhao());
-            liuchengjilu.setTime(LocalDateTime.now().toString());
-            liuchengjilu.setChulijieguo("待审核");
-            liuchengjilu.setBeizhu("null");
-            liuchengjiluService.save(liuchengjilu);
+            Daibanshixiang daibanshixiang_yewujingli = new Daibanshixiang();
+            daibanshixiang_yewujingli.setStatu("未完成");
+            daibanshixiang_yewujingli.setShixiangming("合同待审核");
+            daibanshixiang_yewujingli.setZhongyaochengdu("比较紧急");
+            daibanshixiang_yewujingli.setYonghuming(yonghuguanli.getLeader());
+            daibanshixiang_yewujingli.setNeirong("待审核, 合同编号"+zulinhetong.getHetongbianhao()+", 负责业务员:"+zulinhetong.getYewuyuan());
+            daibanshixiang_yewujingli.setInserttime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiang_yewujingli.setEndtime(today.plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiangService.save(daibanshixiang_yewujingli);
+
+            MessageLog messageLog_yewujingli = BeanUtil.toBean(map, MessageLog.class);
+            messageLog_yewujingli.setIsSystemMessage("false");
+            messageLog_yewujingli.setSendTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            messageLog_yewujingli.setStatus("no");
+            messageLog_yewujingli.setType("warn");
+            messageLogService.save(messageLog_yewujingli);
+//            通知库房, 检查库房存量, 判断是否需要转租业务
+            /**
+             * TODO: 库房相关待完善:
+             * 1. 合同物料录入
+             */
+            //            List<Zulinhetongwuliao> zulinhetongwuliao_list = new ArrayList<>();
+            //            // 从前端传回的内容取, 假设是个List
+            //            map.get("合同物料");
+            //            zulinhetongwuliao_list.add(new Zulinhetongwuliao());
+            //            zulinhetongwuliaoService.saveBatch(zulinhetongwuliao_list);
+
+            Daibanshixiang daibanshixiang_kufang = new Daibanshixiang();
+            daibanshixiang_kufang.setStatu("未完成");
+            daibanshixiang_kufang.setShixiangming("合同待备货");
+            daibanshixiang_kufang.setZhongyaochengdu("比较紧急");
+            daibanshixiang_kufang.setYonghuming("库房名字");
+            daibanshixiang_kufang.setNeirong("待备货, 合同编号"+zulinhetong.getHetongbianhao()+", 负责业务员:"+zulinhetong.getYewuyuan());
+            daibanshixiang_kufang.setInserttime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            daibanshixiang_kufang.setEndtime(today.plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+            MessageLog messageLog_kufang = BeanUtil.toBean(map, MessageLog.class);
+            messageLog_kufang.setIsSystemMessage("false");
+            messageLog_kufang.setSendTime(today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            messageLog_kufang.setStatus("no");
+            messageLog_kufang.setType("warn");
+            messageLogService.save(messageLog_kufang);
 
             return ResponseResult.okResult(200, "操作成功", null);
         }
         return ResponseResult.errorResult(500, "操作失败");
     }
 
+    /**
+     * 删除合同
+     */
     @DeleteMapping("/{id}")
     public ResponseResult<?> remove(@PathVariable Long id) {
         Zulinhetong hetong = zulinhetongService.getById(id);
@@ -239,20 +301,17 @@ public class ZulinhetongController {
         contents.put("项目地址", "(项目地址|工程地点)：(.*)");
         contents.put("开户行", "(开户银行|开户行)：(.*)");
         contents.put("账号", "账号：(.*)");
-        Map<String, Object> returnMap = new HashMap<>();
-        Map<String, Integer> keyCount = new HashMap<>();
+        Map<String, List<String>> returnMap = new HashMap<>();
 //        log.info(files.toString());
         Map<String, MultipartFile> fileMap = files.getFileMap();
-        log.warn("Length:" + fileMap.size());
+        log.warn("Files Length:" + fileMap.size());
         for (MultipartFile file : fileMap.values()) {
             System.out.println("文件名为:" + file.getOriginalFilename());
             List<MultipartFile> fileList = files.getFiles("files");
 //        for(MultipartFile file : files) {
-            log.info(String.valueOf(fileList.size()));
 //        for(MultipartFile file : fileList) {
-            log.warn("图片名:" + file.getOriginalFilename());
             String OCRJson = AccurateBasic.accurateBasic(file.getBytes());
-            log.warn(OCRJson);
+            log.warn("识别结果"+OCRJson);
             if (OCRJson == null) {
                 continue;
             }
@@ -270,23 +329,24 @@ public class ZulinhetongController {
                     }
                     if (matcher.find()) {
                         String key = entry.getKey();
-                        if (returnMap.containsKey(key)) {
-//                            Integer count = keyCount.getOrDefault(key, 0) + 1;
-//                            keyCount.put(key, count);
-//                            key = key + "_" + count;
-                            Object dValue = returnMap.get(key);
-                            ArrayList<String> list;
-                            if (dValue instanceof ArrayList) {
-                                list = (ArrayList<String>) dValue;
-                            } else {
-                                list = new ArrayList<>();
-                                list.add(dValue.toString());
-                            }
-                            list.add(matcher.group(index));
-                            returnMap.put(key, list);
-                        } else {
-                            returnMap.put(key, matcher.group(index));
-                        }
+//                        if (returnMap.containsKey(key)) {
+////                            Integer count = keyCount.getOrDefault(key, 0) + 1;
+////                            keyCount.put(key, count);
+////                            key = key + "_" + count;
+//                            Object dValue = returnMap.get(key);
+//                            ArrayList<String> list;
+//                            if (dValue instanceof ArrayList) {
+//                                list = (ArrayList<String>) dValue;
+//                            } else {
+//                                list = new ArrayList<>();
+//                                list.add(dValue.toString());
+//                            }
+//                            list.add(matcher.group(index));
+//                            returnMap.put(key, list);
+//                        } else {
+//                            returnMap.put(key, matcher.group(index));
+//                        }
+                        returnMap.computeIfAbsent(key, k-> new ArrayList<>()).add(matcher.group(index));
                     }
                 }
             }
@@ -338,6 +398,10 @@ public class ZulinhetongController {
     //    @PostMapping(value = "/photoOCR", headers = "Content-Type=multipart/form-data")
 ////    public ResponseResult<?> photoOCR(@RequestParam(value = "files") List<MultipartFile> files) throws IOException {
 //    public ResponseResult<?> photoOCR(MultipartRequest files) throws IOException {
+
+    /**
+     * 合同附件提交
+     */
     @Transactional
     @PostMapping(value = "/materialSubmit/{HeTongBianHao}", headers = "Content-Type=multipart/form-data")
     public ResponseResult<?> materialSubmit(@PathVariable String HeTongBianHao, MultipartRequest files) throws IOException {
@@ -419,6 +483,9 @@ public class ZulinhetongController {
 //        return ResponseResult.okResult(200, "操作成功", null);
 //    }
 
+    /**
+     * 合同附件添加 ( 提交后补交 )
+     */
     @PostMapping("/materialAdd/{HeTongBianHao}")
 //    public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, @RequestParam(value = "files") List<MultipartFile> files) throws IOException {
     public ResponseResult<?> materialAdd(@PathVariable String HeTongBianHao, MultipartRequest files) throws IOException {
@@ -595,22 +662,21 @@ public class ZulinhetongController {
 ////            System.out.println(yonghuguanli.getLeader());
 //            JSONObject json = new JSONObject(xiaoxi);
 //            WebSocketServer.sendInfo(yonghuguanli.getLeader(),json.toString());
-            String xiaoxiNeiRong = "合同编号:" + map.get("HeTongBianHao") + ", 审批结果为:" + map.get("ChuLiJieGuo") + ".";
-            Map<String, String> xiaoxi = new HashMap<>();
-            xiaoxi.put("title", "合同审批");
-            xiaoxi.put("neirong", xiaoxiNeiRong);
-            xiaoxi.put("type", "info");
-            // xiaoxi.put
-            JSONObject json = new JSONObject(xiaoxi);
-            WebSocketServer.sendInfo(map.get("YongHuMing"), json.toString());
-            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
-            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
-            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
-            xiaoxituisonglog.setJieshoufangid(map.get("YongHuMing"));
-            xiaoxituisonglog.setType("info");
-            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
-            xiaoxituisonglogService.save(xiaoxituisonglog);
-
+//            String xiaoxiNeiRong = "合同编号:" + map.get("HeTongBianHao") + ", 审批结果为:" + map.get("ChuLiJieGuo") + ".";
+//            Map<String, String> xiaoxi = new HashMap<>();
+//            xiaoxi.put("title", "合同审批");
+//            xiaoxi.put("neirong", xiaoxiNeiRong);
+//            xiaoxi.put("type", "info");
+//            // xiaoxi.put
+//            JSONObject json = new JSONObject(xiaoxi);
+//            WebSocketServer.sendInfo(map.get("YongHuMing"), json.toString());
+//            Xiaoxituisonglog xiaoxituisonglog = new Xiaoxituisonglog();
+//            xiaoxituisonglog.setXiaoxineirong(xiaoxiNeiRong);
+//            xiaoxituisonglog.setFasongfangid(UserHolder.getUser().getUsername());
+//            xiaoxituisonglog.setJieshoufangid(map.get("YongHuMing"));
+//            xiaoxituisonglog.setType("info");
+//            xiaoxituisonglog.setInserttime(LocalDateTime.now().toString());
+//            xiaoxituisonglogService.save(xiaoxituisonglog);
             return ResponseResult.okResult(200, "操作成功", null);
         } else {
             throw new RuntimeException("审核失败.");
@@ -657,6 +723,13 @@ public class ZulinhetongController {
         return ResponseResult.okResult(200, "操作成功", shenPi);
     }
 
+
+
+    @GetMapping("/shenpiJinDu/{HeTongBianHao}/{YeWuYuan}")
+    public ResponseResult<?> ShenPiJinDu(@PathVariable("HeTongBianHao") String HeTongBianHao, @PathVariable("YeWuYuan") String YeWuYuan) {
+        return ResponseResult.okResult(200, "ok", getHeTongShenPiJingDu(HeTongBianHao, YeWuYuan));
+    }
+
     private Map<String, Object> getHeTongShenPiJingDu(String HeTongBianHao, String YeWuYuan) {
         QueryWrapper<Liuchengdingyi> liuchengdingyiQueryWrapper = new QueryWrapper<>();
         liuchengdingyiQueryWrapper.eq("YeWuMingCheng", "租赁合同");
@@ -678,11 +751,6 @@ public class ZulinhetongController {
         returnMap.put("ShenPiJinDu", liuchengjilu);
         returnMap.put("ShenPiJiLu", liuchengjiluInfo);
         return returnMap;
-    }
-
-    @GetMapping("/shenpiJinDu/{HeTongBianHao}/{YeWuYuan}")
-    public ResponseResult<?> ShenPiJinDu(@PathVariable("HeTongBianHao") String HeTongBianHao, @PathVariable("YeWuYuan") String YeWuYuan) {
-        return ResponseResult.okResult(200, "ok", getHeTongShenPiJingDu(HeTongBianHao, YeWuYuan));
     }
 }
 

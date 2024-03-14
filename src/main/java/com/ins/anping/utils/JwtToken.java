@@ -73,7 +73,6 @@ public class JwtToken {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256("AnPingSyS_QeHing")).build();
 
         Map<String, Object> returenMap = new HashMap<>();
-        log.info(token);
         try {
             DecodedJWT jwt = verifier.verify(token);
             returenMap.put("code", 0);

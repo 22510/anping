@@ -1,11 +1,14 @@
 package com.ins.anping.base.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -13,7 +16,7 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author INS
- * @since 2024-03-12
+ * @since 2024-03-14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -23,6 +26,7 @@ public class MessageLog implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "自增ID")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty(value = "是否为系统消息, true/false")

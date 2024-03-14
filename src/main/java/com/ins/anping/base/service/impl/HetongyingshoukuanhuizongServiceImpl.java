@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 @Service
 public class HetongyingshoukuanhuizongServiceImpl extends ServiceImpl<HetongyingshoukuanhuizongMapper, Hetongyingshoukuanhuizong> implements IHetongyingshoukuanhuizongService {

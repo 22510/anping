@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author INS
- * @since 2024-03-08
+ * @since 2024-03-14
  */
 public interface Ziliao4zulinhetongMapper extends BaseMapper<Ziliao4zulinhetong> {
 

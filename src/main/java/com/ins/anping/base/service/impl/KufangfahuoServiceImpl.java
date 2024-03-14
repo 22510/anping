@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * 库房发货 服务实现类
+ * 发货信息查询 服务实现类
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 @Service
 public class KufangfahuoServiceImpl extends ServiceImpl<KufangfahuoMapper, Kufangfahuo> implements IKufangfahuoService {

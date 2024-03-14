@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -76,11 +76,11 @@ public class Zulinhetong implements Serializable {
     @TableField("JieZhiRiQi")
     private String jiezhiriqi;
 
-    @ApiModelProperty(value = "物料运费")
-    @TableField("WuLiaoYunFei")
-    private String wuliaoyunfei;
+    @ApiModelProperty(value = "运费计算: 一份合同下, 租赁物料的运输费用相关事宜")
+    @TableField("YunFeiJiSuan")
+    private String yunfeijisuan;
 
-    @ApiModelProperty(value = "合同图片")
+    @ApiModelProperty(value = "合同资料")
     @TableField("HeTongTuPian")
     private String hetongtupian;
 
@@ -96,7 +96,7 @@ public class Zulinhetong implements Serializable {
     @TableField("YeWuYuan")
     private String yewuyuan;
 
-    @ApiModelProperty(value = "合同执行进度")
+    @ApiModelProperty(value = "合同执行进度: 待审核, 审批中, 待备货, 待发货, 发货中, 租赁中, 退货中, 已完成. 已作废.")
     @TableField("HeTongZhiXingJinDu")
     private String hetongzhixingjindu;
 

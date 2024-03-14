@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 public interface YonghuguanliMapper extends BaseMapper<Yonghuguanli> {
 

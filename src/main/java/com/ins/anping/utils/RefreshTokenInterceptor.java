@@ -36,7 +36,6 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 //        Enumeration<String> headers = request.getHeaders("token");
 //        log.warn(String.valueOf(headers));
         String token = request.getHeader("Authorization");
-        System.out.println(token);
         if (StrUtil.isBlank(token)){
             log.warn("用户没有携带token");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -56,7 +55,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         userDTO.setJueSe(map.get("JueSe").toString());
 
         UserHolder.saveUser(userDTO);
-        log.info("刷新token");
+        log.info("[Token] 刷新用户{}的token", userDTO.getUsername());
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("username", map.get("username").toString());
         userMap.put("JueSe", map.get("JueSe").toString());

@@ -154,7 +154,6 @@ public class LoginWebController {
         userInfo.put("yonghuming", userDetail.getYonghuming());
         userInfo.put("jueseName", jueseguanliService.getById(userDetail.getJuese()).getJuese());
         userInfo.put("juese", userDetail.getJuese());
-
         retmap.put("token", jwtToken.createToken(userMap, USER_TOKEN_EXPTIME));
         retmap.put("userInfo", userInfo);
         log.info("Login:"+ retmap);
@@ -165,4 +164,24 @@ public class LoginWebController {
         Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
         return pattern.matcher(str).matches();
     }
+
+//    public void makeUser(){
+//        Scanner scanner = new Scanner(System.in);
+//        String userName = scanner.nextLine();
+//        String password = scanner.nextLine();
+//        String role = scanner.nextLine();
+//        String phone = scanner.nextLine();
+//        String status = "yes";
+//        String leader = scanner.nextLine();
+//        password = PasswordEncoder.encode("AnPingSys_" + password + "QeHing");
+//        Yonghuguanli yonghuguanli = new Yonghuguanli();
+//        yonghuguanli.setYonghuming(userName);
+//        yonghuguanli.setJuese(role);
+//        yonghuguanli.setShouji(phone);
+//        yonghuguanli.setYonghuzhuangtai(status);
+//        yonghuguanli.setMima(password);
+//        yonghuguanli.setZhuceshijian(MyTimeUtils.getNow());
+//        yonghuguanli.setInserttime(MyTimeUtils.getNow());
+//
+//    }
 }

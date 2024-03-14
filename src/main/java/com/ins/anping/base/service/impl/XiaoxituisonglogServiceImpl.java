@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author INS
- * @since 2024-03-08
+ * @since 2024-03-14
  */
 @Service
 public class XiaoxituisonglogServiceImpl extends ServiceImpl<XiaoxituisonglogMapper, Xiaoxituisonglog> implements IXiaoxituisonglogService {

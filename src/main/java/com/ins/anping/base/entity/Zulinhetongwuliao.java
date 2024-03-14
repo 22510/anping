@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -32,21 +32,25 @@ public class Zulinhetongwuliao implements Serializable {
     @TableField("HeTongBianHao")
     private String hetongbianhao;
 
+    @ApiModelProperty(value = "物料编号")
+    @TableField("WuLiaoBianHao")
+    private String wuliaobianhao;
+
     @ApiModelProperty(value = "物料名称")
     @TableField("WuLiaoMingCheng")
     private String wuliaomingcheng;
 
-    @ApiModelProperty(value = "规格（mm）")
-    @TableField("GuiGemM")
-    private String guigemm;
+    @ApiModelProperty(value = "租赁价格(含税)")
+    @TableField("ZuLinJiaGeHanShui")
+    private String zulinjiagehanshui;
 
-    @ApiModelProperty(value = "型号")
-    @TableField("XingHao")
-    private String xinghao;
+    @ApiModelProperty(value = "租赁价格(不含税)")
+    @TableField("ZuLinJiaGeBuHanShui")
+    private String zulinjiagebuhanshui;
 
-    @ApiModelProperty(value = "计量单位")
-    @TableField("JiLiangDanWei")
-    private String jiliangdanwei;
+    @ApiModelProperty(value = "租赁数量")
+    @TableField("ZuLinShuLiang")
+    private Long zulinshuliang;
 
     @ApiModelProperty(value = "损坏赔偿")
     @TableField("SunHuaiPeiChang")
@@ -55,10 +59,6 @@ public class Zulinhetongwuliao implements Serializable {
     @ApiModelProperty(value = "丢失赔偿")
     @TableField("DiuShiPeiChang")
     private String diushipeichang;
-
-    @ApiModelProperty(value = "物料单价")
-    @TableField("WuLiaoDanJia")
-    private String wuliaodanjia;
 
     @ApiModelProperty(value = "备注")
     @TableField("BeiZhu")

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- *  服务实现类
+ * 库房物料总体管理 服务实现类
  * </p>
  *
  * @author INS
- * @since 2024-03-13
+ * @since 2024-03-14
  */
 @Service
 public class KufangwuliaoServiceImpl extends ServiceImpl<KufangwuliaoMapper, Kufangwuliao> implements IKufangwuliaoService {

@@ -9,10 +9,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author INS
- * @since 2024-03-08
+ * @since 2024-03-14
  */
 public interface IZiliao4zulinhetongService extends IService<Ziliao4zulinhetong> {
-
-
 
 }

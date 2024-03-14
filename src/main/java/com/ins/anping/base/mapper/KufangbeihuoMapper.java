@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>
- * 库房备货 Mapper 接口
+ * 库房备货查询 Mapper 接口
  * </p>
  *
  * @author INS
- * @since 2024-03-06
+ * @since 2024-03-14
  */
 public interface KufangbeihuoMapper extends BaseMapper<Kufangbeihuo> {
 
